@@ -2,13 +2,13 @@ from distutils.core import setup
 setup(
   name = 'rubika',
   packages = ['rubika'],
-  version = '1.0',
+  version = '2.0',
   license='MIT', 
   description = 'rubika library is a unofficial library for making bot in the rubika. this library works with rubika’s API',
   author = 'Bahman Ahmadi',
   author_email = 'bahmanahmadi.mail@gmail.com',
   url = 'https://github.com/Bahman-Ahmadi/rubika',
-  download_url = 'https://github.com/Bahman-Ahmadi/rubika/archive/refs/tags/v_10.tar.gz',
+  download_url = 'https://github.com/Bahman-Ahmadi/rubika/archive/refs/tags/v_20.tar.gz',
   keywords = [],
   install_requires=[
           'requests',
