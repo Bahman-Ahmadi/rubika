@@ -6,7 +6,7 @@ those bots that makes with this library, will be run on your account;
 so you should get your account's <b>API key</b>.
 and another point is it.. you are only allowed to run the bot in one chat at a time.
 so you should get chat's <b>GUID</b>.
-
+<hr/>
 <h3>introductions</h3>
 1. unix or windows system<br/>
 2. python 3<br/>
@@ -17,15 +17,13 @@ so you should get chat's <b>GUID</b>.
 - tqdm<br/>
 <br/>
 <i>note: libraries automatically will be installed when you install rubika library</i>
-
-
+<hr/>
 <h3>install</h3>
 enter this command on your command line to install the library
 <pre lang="bash">pip install rubika</pre>
 <br/>
 <i>first introductions will be installed then rubika library</i>
-<br/>
-<br/>
+<hr/>
 <h3>use</h3>
 enter this example code in a file or enter line-to-line in the python3 shell:
 <pre lang="py3">
@@ -38,8 +36,7 @@ bot.sendMessage(target, 'YOUR-MESSAGE')
 </pre>
 <br/>
 as result your message will be sent in the target chat.
-<br/>
-<br/>
+<hr/>
 <h3>documents</h3>
-for reading more about this library, you can visit site:
+for reading more about this library, you can visit site:<br/>
 🌐 http://rublib.ir
