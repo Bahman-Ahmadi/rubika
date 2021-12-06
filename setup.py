@@ -8,15 +8,14 @@ setup(
   author = 'Bahman Ahmadi',
   author_email = 'bahmanahmadi.mail@gmail.com',
   url = 'https://github.com/Bahman-Ahmadi/rubika',
-  download_url = 'https://github.com/Bahman-Ahmadi/rubika/archive/v1.tar.gz',
+  download_url = 'https://github.com/Bahman-Ahmadi/rubika/archive/refs/tags/v_10.tar.gz',
   keywords = [],
   install_requires=[
           'requests',
           'pycryptodome',
           'requests',
           'urllib3',
-          'tqdm',
-          ''
+          'tqdm'
       ],
   classifiers=[
     'Development Status :: 3 - Alpha',
