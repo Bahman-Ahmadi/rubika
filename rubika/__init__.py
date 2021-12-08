@@ -251,3 +251,34 @@ class Bot:
 						"lang_code":"fa"
 					}
 			}))}, url="https://messengerg2c24.iranlms.ir/").json()["data_enc"]))
+	def get_updates_all_chats(self):
+		time_stamp = str(random._floor(datetime.datetime.today().timestamp()) - 200)
+		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
+			"method":"getChatsUpdates",
+			"input":{
+				"state":time_stamp,
+			},
+			"client":{
+				"app_name":"Main",
+				"app_version":"3.2.1",
+				"platform":"Web",
+				"package":"web.rubika.ir",
+				"lang_code":"fa"
+			}
+		}))},url="https://messengerg2c67.iranlms.ir/").json().get("data_enc"))).get("data").get("chats")
+	def get_updates_chat(self, chat_id):
+		time_stamp = str(random._floor(datetime.datetime.today().timestamp()) - 200)
+		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
+			"method":"getMessagesUpdates",
+			"input":{
+				"object_guid":chat_id,
+				"state":time_stamp
+			},
+			"client":{
+				"app_name":"Main",
+				"app_version":"3.2.1",
+				"platform":"Web",
+				"package":"web.rubika.ir",
+				"lang_code":"fa"
+			}
+		}))},url="https://messengerg2c67.iranlms.ir/").json().get("data_enc"))).get("data").get("updated_messages")
