@@ -251,3 +251,16 @@ class Bot:
 						"lang_code":"fa"
 					}
 			}))}, url="https://messengerg2c24.iranlms.ir/").json()["data_enc"]))
+	def my_sticker_set(self):
+		time_stamp = str(random._floor(datetime.datetime.today().timestamp()) - 200)
+		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
+			"method":"getMyStickerSets",
+			"input":{},
+			"client":{
+				"app_name":"Main",
+				"app_version":"3.2.1",
+				"platform":"Web",
+				"package":"web.rubika.ir",
+				"lang_code":"fa"
+			}
+		}))},url="https://messengerg2c67.iranlms.ir/").json().get("data_enc"))).get("data")
