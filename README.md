@@ -1,7 +1,7 @@
 <h1>rubika</h1>
 <br/>
 this is a <b>unofficial</b> library for making bots in rubika
-using this library you can make your own0 rubika bot and control that
+using this library you can make your own rubika bot and control that
 those bots that makes with this library, will be run on your account;
 so you should get your account's <b>API key</b>.
 and another point is it.. you are only allowed to run the bot in one chat at a time.
