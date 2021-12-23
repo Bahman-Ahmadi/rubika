@@ -50,7 +50,7 @@ class Bot:
 	def __init__(self, auth):
 		self.auth = auth
 		self.enc = encryption(auth)
-		
+
 	def sendMessage(self, chat_id, text, message_id=None):
 		if message_id == None:
 			return post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
@@ -86,7 +86,7 @@ class Bot:
 					"lang_code":"fa"
 				}
 			}))},url="https://messengerg2c17.iranlms.ir/")
-	
+
 	def deleteMessages(self, chat_id, message_ids):
 		return post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
 			"method":"deleteMessages",
@@ -103,7 +103,7 @@ class Bot:
 				"lang_code":"fa"
 			}
 		}))},url="https://messengerg2c66.iranlms.ir/")
-	
+
 	def getUserInfo(self, chat_id):
 		return loads(self.enc.decrypt(post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
 			"method":"getUserInfo",
@@ -118,7 +118,7 @@ class Bot:
 				"lang_code":"fa"
 			}
 		}))},url="https://messengerg2c37.iranlms.ir/").json()["data_enc"]))
-	
+
 	def getMessages(self, chat_id,min_id):
 		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
 			"method":"getMessagesInterval",
@@ -134,7 +134,7 @@ class Bot:
 				"lang_code":"fa"
 			}
 		}))},url="https://messengerg2c67.iranlms.ir/").json().get("data_enc"))).get("data").get("messages")
-		
+
 	def getInfoByUsername(self, username):
 		''' username should be without @ '''
 		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
@@ -183,7 +183,7 @@ class Bot:
 				"lang_code":"fa"
 			}
 		}))},url="https://messengerg2c22.iranlms.ir/")
-	
+
 	def getGroupAdmins(self, chat_id):
 		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
 			"client":{
@@ -235,19 +235,21 @@ class Bot:
 
 	def getGroupMembers(self, chat_id):
 		return loads(self.enc.decrypt(post(json={
-			"api_version": "4",
-			"auth": self.auth,
-			"client": {
-				"app_name": "Main",
-				"app_version": "2.9.5",
-				"lang_code": "fa",
-				"package": "ir.resaneh1.iptv",
-				"platform": "Android"
-			},
-			"data_enc": self.enc.encrypt(dumps({
-				"group_guid": chat_id
-			})),
-			"method": "getGroupAllMembers"
+			"api_version":"5",
+				"auth": self.auth,
+				"data_enc": self.enc.encrypt(dumps({
+					"method":"getGroupAllMembers",
+					"input":{
+						"group_guid": chat_id,
+					},
+					"client":{
+						"app_name":"Main",
+						"app_version":"3.2.1",
+						"platform":"Web",
+						"package":"web.rubika.ir",
+						"lang_code":"fa"
+					}
+			}))
 		}, url="https://messengerg2c17.iranlms.ir/").json()["data_enc"]))["data"]["in_chat_members"]
 
 	def getGroupInfo(self, chat_id):
@@ -268,3 +270,273 @@ class Bot:
 						"lang_code":"fa"
 					}
 			}))}, url="https://messengerg2c24.iranlms.ir/").json()["data_enc"]))
+
+	def getGroupLink(self, chat_id):
+		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
+			"method":"getGroupLink",
+			"input":{
+				"group_guid":chat_id
+			},
+			"client":{
+				"app_name":"Main",
+				"app_version":"3.2.1",
+				"platform":"Web",
+				"package":"web.rubika.ir",
+				"lang_code":"fa"
+			}
+		}))},url="https://messengerg2c67.iranlms.ir/").json().get("data_enc"))).get("data").get("join_link")
+
+
+	# thanks for Sajjad Soleymani
+	def get_updates_all_chats(self):
+		time_stamp = str(random._floor(datetime.datetime.today().timestamp()) - 200)
+		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
+			"method":"getChatsUpdates",
+			"input":{
+				"state":time_stamp,
+			},
+			"client":{
+				"app_name":"Main",
+				"app_version":"3.2.1",
+				"platform":"Web",
+				"package":"web.rubika.ir",
+				"lang_code":"fa"
+			}
+		}))},url="https://messengerg2c67.iranlms.ir/").json().get("data_enc"))).get("data").get("chats")
+
+	def get_updates_chat(self, chat_id):
+		time_stamp = str(random._floor(datetime.datetime.today().timestamp()) - 200)
+		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
+			"method":"getMessagesUpdates",
+			"input":{
+				"object_guid":chat_id,
+				"state":time_stamp
+			},
+			"client":{
+				"app_name":"Main",
+				"app_version":"3.2.1",
+				"platform":"Web",
+				"package":"web.rubika.ir",
+				"lang_code":"fa"
+			}
+		}))},url="https://messengerg2c67.iranlms.ir/").json().get("data_enc"))).get("data").get("updated_messages")
+
+	def my_sticker_set(self):
+		time_stamp = str(random._floor(datetime.datetime.today().timestamp()) - 200)
+		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
+			"method":"getMyStickerSets",
+			"input":{},
+			"client":{
+				"app_name":"Main",
+				"app_version":"3.2.1",
+				"platform":"Web",
+				"package":"web.rubika.ir",
+				"lang_code":"fa"
+			}
+		}))},url="https://messengerg2c67.iranlms.ir/").json().get("data_enc"))).get("data")
+
+	def requestFile(name, size , mime):
+		o = ''
+		while str(o) != '<Response [200]>':
+			o = post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
+				"method":"requestSendFile",
+				"input":{
+					"file_name":name,
+					"size":size,
+					"mime":mime
+				},
+				"client":{
+					"app_name":"Main",
+					"app_version":"3.2.1",
+					"platform":"Web",
+					"package":"web.rubika.ir",
+					"lang_code":"fa"
+				}
+			}))},url="https://messengerg2c66.iranlms.ir/")
+			try:
+				k = loads(self.enc.decrypt(o.json()["data_enc"]))
+				if k['status'] != 'OK' or k['status_det'] != 'OK':
+					o = '502'
+			except:
+				o = '502'
+		return k['data']
+
+	def fileUpload(bytef ,hash_send ,file_id ,url):
+		if len(bytef) <= 131072:
+			h = {
+				'auth':self.auth,
+				'chunk-size':str(len(bytef)),
+				'file-id':str(file_id),
+				'access-hash-send':hash_send,
+				'total-part':str(1),
+				'part-number':str(1)
+			}
+			t = False
+			while t == False:
+				try:
+					j = post(data=bytef,url=url,headers=h).text
+					j = loads(j)['data']['access_hash_rec']
+					t = True
+				except:
+					t = False
+
+			return j
+		else:
+			t = len(bytef) / 131072
+			t += 1
+			t = random._floor(t)
+			for i in range(1,t+1):
+				if i != t:
+					k = i - 1
+					k = k * 131072
+					t2 = False
+					while t2 == False:
+						try:
+							o = post(data=bytef[k:k + 131072],url=url,headers={
+								'auth':self.auth,
+								'chunk-size':str(131072),
+								'file-id':file_id,
+								'access-hash-send':hash_send,
+								'total-part':str(t),
+								'part-number':str(i)
+							}).text
+							o = loads(o)['data']
+							t2 = True
+						except:
+							t2 = False
+					j = k + 131072
+					j = round(j / 1024)
+					j2 = round(len(bytef) / 1024)
+					print(str(j) + 'kb / ' + str(j2) + ' kb')
+				else:
+					k = i - 1
+					k = k * 131072
+					t2 = False
+					while t2 == False:
+						try:
+							p = post(data=bytef[k:],url=url,headers={
+								'auth':self.auth,
+								'chunk-size':str(len(bytef[k:])),
+								'file-id':file_id,
+								'access-hash-send':hash_send,
+								'total-part':str(t),
+								'part-number':str(i)
+							}).text
+							p = loads(p)['data']['access_hash_rec']
+							t2 = True
+						except:
+							t2 = False
+					j2 = round(len(bytef) / 1024)
+					print(str(j2) + 'kb / ' + str(j2) + ' kb')
+					return p
+
+	def sendFile(chat_id, file_id , mime , dc_id, access_hash_rec, file_name, size, text=None, message_id=None):
+		if text == None:
+			if message_id == None:
+				t = False
+				while t == False:
+					try:
+						p = loads(self.enc.decrypt(loads(post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
+							"method":"sendMessage",
+							"input":{
+								"object_guid":chat_id,
+								"rnd":f"{randint(100000,900000)}",
+								"file_inline":{
+									"dc_id":str(dc_id),
+									"file_id":str(file_id),
+									"type":"File",
+									"file_name":file_name,
+									"size":size,
+									"mime":mime,
+									"access_hash_rec":access_hash_rec
+								}
+							},
+							"client":{
+								"app_name":"Main",
+								"app_version":"3.2.1",
+								"platform":"Web",
+								"package":"web.rubika.ir",
+								"lang_code":"fa"
+							}
+						}))},url="https://messengerg2c17.iranlms.ir/").text)['data_enc']))
+						t = True
+					except:
+						t = False
+				return p
+			else:
+				return loads(self.enc.decrypt(loads(post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
+					"method":"sendMessage",
+					"input":{
+						"object_guid":chat_id,
+						"rnd":f"{randint(100000,900000)}",
+						"reply_to_message_id":message_id,
+						"file_inline":{
+							"dc_id":str(dc_id),
+							"file_id":str(file_id),
+							"type":"File",
+							"file_name":file_name,
+							"size":size,
+							"mime":mime,
+							"access_hash_rec":access_hash_rec
+						}
+					},
+					"client":{
+						"app_name":"Main",
+						"app_version":"3.2.1",
+						"platform":"Web",
+						"package":"web.rubika.ir",
+						"lang_code":"fa"
+					}
+				}))},url="https://messengerg2c17.iranlms.ir/").text)['data_enc']))
+		else:
+			if message_id == None:
+				return loads(self.enc.decrypt(loads(post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
+					"method":"sendMessage",
+					"input":{
+						"object_guid":chat_id,
+						"rnd":f"{randint(100000,900000)}",
+						"text":text,
+						"file_inline":{
+							"dc_id":str(dc_id),
+							"file_id":str(file_id),
+							"type":"File",
+							"file_name":file_name,
+							"size":size,
+							"mime":mime,
+							"access_hash_rec":access_hash_rec
+						}
+					},
+					"client":{
+						"app_name":"Main",
+						"app_version":"3.2.1",
+						"platform":"Web",
+						"package":"web.rubika.ir",
+						"lang_code":"fa"
+					}
+				}))},url="https://messengerg2c17.iranlms.ir/").text)['data_enc']))
+			else:
+				return loads(self.enc.decrypt(loads(post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
+					"method":"sendMessage",
+					"input":{
+						"object_guid":chat_id,
+						"rnd":f"{randint(100000,900000)}",
+						"text":text,
+						"reply_to_message_id":message_id,
+						"file_inline":{
+							"dc_id":str(dc_id),
+							"file_id":str(file_id),
+							"type":"File",
+							"file_name":file_name,
+							"size":size,
+							"mime":mime,
+							"access_hash_rec":access_hash_rec
+						}
+					},
+					"client":{
+						"app_name":"Main",
+						"app_version":"3.2.1",
+						"platform":"Web",
+						"package":"web.rubika.ir",
+						"lang_code":"fa"
+					}
+				}))},url="https://messengerg2c17.iranlms.ir/").text)['data_enc']))
