@@ -335,7 +335,7 @@ class Bot:
 			}
 		}))},url="https://messengerg2c67.iranlms.ir/").json().get("data_enc"))).get("data")
 
-	def requestFile(name, size , mime):
+	def requestFile(self, name, size , mime):
 		o = ''
 		while str(o) != '<Response [200]>':
 			o = post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
@@ -361,7 +361,7 @@ class Bot:
 				o = '502'
 		return k['data']
 
-	def fileUpload(bytef ,hash_send ,file_id ,url):
+	def fileUpload(self, bytef ,hash_send ,file_id ,url):
 		if len(bytef) <= 131072:
 			h = {
 				'auth':self.auth,
@@ -430,7 +430,7 @@ class Bot:
 					print(str(j2) + 'kb / ' + str(j2) + ' kb')
 					return p
 
-	def sendFile(chat_id, file_id , mime , dc_id, access_hash_rec, file_name, size, text=None, message_id=None):
+	def sendFile(self, chat_id, file_id , mime , dc_id, access_hash_rec, file_name, size, text=None, message_id=None):
 		if text == None:
 			if message_id == None:
 				t = False
