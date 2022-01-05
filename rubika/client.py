@@ -2,7 +2,7 @@ from pathlib import Path
 from requests import post
 from random import randint
 from json import loads, dumps
-#import random, datetime, encryption
+import random, datetime, rubika.encryption
 
 # because should be exist !
 adminsAccess = {
@@ -24,7 +24,7 @@ usersAccess = {
 class Bot:
 	def __init__(self, auth):
 		self.auth = auth
-		self.enc = encryption.encryption(auth)
+		self.enc = rubika.encryption.encryption(auth)
 
 	@staticmethod
 	def _getURL():
