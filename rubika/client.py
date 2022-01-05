@@ -28,9 +28,12 @@ class Bot:
 
 	@staticmethod
 	def _getURL():
+		return "https://messengerg2c64.iranlms.ir/"
+		'''
 		result = []
 		for i in range(11,99): result.append(f"https://messengerg2c{i}.iranlms.ir/")
 		return random.choice(result)
+		'''
 
 	def _requestSendFile(self, file):
 		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
@@ -47,7 +50,7 @@ class Bot:
 				"package":"web.rubika.ir",
 				"lang_code":"fa"
 			}
-		}))},url="https://messengerg2c64.iranlms.ir/").json()["data_enc"]))["data"]
+		}))},url=Bot._getURL()).json()["data_enc"]))["data"]
 
 	def _uploadFile(self, file):
 		frequest = Bot._requestSendFile(self, file)
