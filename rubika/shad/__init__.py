@@ -1,35 +1,72 @@
-from pathlib import Path
+# Thanks For DarkCode
+
 from requests import post
-from random import randint
+from random import randint, choice
 from json import loads, dumps
+import asyncio,base64,glob,json,math,urllib3,os,pathlib,random,sys,concurrent.futures,time
+from tqdm import tqdm
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from pathlib import Path
 import random, datetime, encryption
 
-# because should be exist !
-adminsAccess = {
-	"pin":"PinMessages",
-	"newAdmin":"SetAdmin",
-	"editInfo":"ChangeInfo",
-	"banMember":"BanMember",
-	"changeLink":"SetJoinLink",
-	"changeMembersAccess":"SetMemberAccess",
-	"deleteMessages":"DeleteGlobalAllMessages"
+client = lambda v : {
+	"app_name":"Main",
+	"app_version":v,
+	"platform":"Web",
+	"package":"web.shad.ir",
+	"lang_code":"fa"
 }
-usersAccess = {
-	"addMember":"AddMember",
-	"viewAdmins":"ViewAdmins",
-	"viewMembers":"ViewMembers",
-	"sendMessage":"SendMessages"
-}
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+class encryption:
+    def __init__(self, auth):
+        self.key = bytearray(self.secret(auth), "UTF-8")
+        self.iv = bytearray.fromhex('00000000000000000000000000000000')
+
+    def replaceCharAt(self, e, t, i):
+        return e[0:t] + i + e[t + len(i):]
+
+    def secret(self, e):
+        t = e[0:8]
+        i = e[8:16]
+        n = e[16:24] + t + e[24:32] + i
+        s = 0
+        while s < len(n):
+            e = n[s]
+            if e >= '0' and e <= '9':
+                t = chr((ord(e[0]) - ord('0') + 5) % 10 + ord('0'))
+                n = self.replaceCharAt(n, s, t)
+            else:
+                t = chr((ord(e[0]) - ord('a') + 9) % 26 + ord('a'))
+                n = self.replaceCharAt(n, s, t)
+            s += 1
+        return n
+
+    def encrypt(self, text):
+        raw = pad(text.encode('UTF-8'), AES.block_size)
+        aes = AES.new(self.key, AES.MODE_CBC, self.iv)
+        enc = aes.encrypt(raw)
+        result = base64.b64encode(enc).decode('UTF-8')
+        return result
+
+    def decrypt(self, text):
+        aes = AES.new(self.key, AES.MODE_CBC, self.iv)
+        dec = aes.decrypt(base64.urlsafe_b64decode(text.encode('UTF-8')))
+        result = unpad(dec, AES.block_size).decode('UTF-8')
+        return result
+
 
 class Bot:
 	def __init__(self, auth):
 		self.auth = auth
-		self.enc = encryption.encryption(auth)
+		self.enc = encryption(auth)
 
 	@staticmethod
 	def _getURL():
 		result = []
-		for i in range(11,99): result.append(f"https://messengerg2c{i}.iranlms.ir/")
+		for i in range(11,99): result.append(f"https://shadmessenger{i}.iranlms.ir/")
 		return random.choice(result)
 
 	def _requestSendFile(self, file):
@@ -40,14 +77,8 @@ class Bot:
 				"mime": file.split(".")[-1],
 				"size": Path(file).stat().st_size
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
-		}))},url="https://messengerg2c64.iranlms.ir/").json()["data_enc"]))["data"]
+			"client": client("3.2.2")
+		}))},url=Bot._getURL()).json()["data_enc"]))["data"]
 
 	def _uploadFile(self, file):
 		frequest = Bot._requestSendFile(self, file)
@@ -117,13 +148,7 @@ class Bot:
 				"text":text,
 				"reply_to_message_id":message_id
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client": client("3.2.2")
 		}
 		if metadata != [] : inData["input"]["metadata"] = {"meta_data_parts":metadata}
 		return post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps(inData))},url=Bot._getURL())
@@ -136,13 +161,7 @@ class Bot:
 				"object_guid": chat_id,
 				"text": newText
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client": client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def deleteMessages(self, chat_id, message_ids):
@@ -153,13 +172,7 @@ class Bot:
 				"message_ids":message_ids,
 				"type":"Global"
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client": client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def getUserInfo(self, chat_id):
@@ -168,13 +181,7 @@ class Bot:
 			"input":{
 				"user_guid":chat_id
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client": client("3.2.2")
 		}))},url=Bot._getURL()).json()["data_enc"]))
 
 	def getMessages(self, chat_id,min_id):
@@ -184,13 +191,7 @@ class Bot:
 				"object_guid":chat_id,
 				"middle_message_id":min_id
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client": client("3.2.2")
 		}))},url=Bot._getURL()).json().get("data_enc"))).get("data").get("messages")
 
 	def getInfoByUsername(self, username):
@@ -200,13 +201,7 @@ class Bot:
 			"input":{
 				"username":username
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL()).json().get("data_enc")))
 
 	def banGroupMember(self, chat_id, user_id):
@@ -217,13 +212,7 @@ class Bot:
 				"member_guid": user_id,
 				"action":"Set"
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def invite(self, chat_id, user_ids):
@@ -233,13 +222,7 @@ class Bot:
 				"group_guid": chat_id,
 				"member_guids": user_ids
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def getGroupAdmins(self, chat_id):
@@ -264,13 +247,7 @@ class Bot:
 				"object_guid": chat_id,
 				"message_ids": message_ids
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))}, url=Bot._getURL()).json()["data_enc"])).get("data").get("messages")
 
 	def setMembersAccess(self, chat_id, access_list):
@@ -300,13 +277,7 @@ class Bot:
 					"input":{
 						"group_guid": chat_id,
 					},
-					"client":{
-						"app_name":"Main",
-						"app_version":"3.2.1",
-						"platform":"Web",
-						"package":"web.rubika.ir",
-						"lang_code":"fa"
-					}
+					"client":client("3.2.2")
 			}))
 		}, url=Bot._getURL()).json()["data_enc"]))["data"]["in_chat_members"]
 
@@ -320,13 +291,7 @@ class Bot:
 					"input":{
 						"group_guid": chat_id,
 					},
-					"client":{
-						"app_name":"Main",
-						"app_version":"3.2.1",
-						"platform":"Web",
-						"package":"web.rubika.ir",
-						"lang_code":"fa"
-					}
+					"client":client("3.2.2")
 			}))}, url=Bot._getURL()).json()["data_enc"]))
 
 	def getGroupLink(self, chat_id):
@@ -335,13 +300,7 @@ class Bot:
 			"input":{
 				"group_guid":chat_id
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL()).json().get("data_enc"))).get("data").get("join_link")
 
 	def changeGroupLink(self, chat_id):
@@ -419,13 +378,7 @@ class Bot:
 		return post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
 			"method":"logout",
 			"input":{},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def forwardMessages(self, From, message_ids, to):
@@ -437,13 +390,7 @@ class Bot:
 				"rnd": f"{randint(100000,999999999)}",
 				"to_object_guid": to
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def seenChats(self, seenList):
@@ -453,13 +400,7 @@ class Bot:
 			"input":{
 				"seen_list": seenList
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def sendChatAction(self, chat_id, action):
@@ -470,13 +411,7 @@ class Bot:
 				"activity": action,
 				"object_guid": chat_id
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def pin(self, chat_id, message_id):
@@ -518,13 +453,7 @@ class Bot:
 			"input":{
 				"hash_link": hashLink
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def leaveGroup(self, chat_id):
@@ -533,13 +462,7 @@ class Bot:
 			"input":{
 				"group_guid": chat_id
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def block(self, chat_id):
@@ -549,13 +472,7 @@ class Bot:
 				"action": "Block",
 				"user_guid": chat_id
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL())
 		
 	def unblock(self, chat_id):
@@ -565,13 +482,7 @@ class Bot:
 				"action": "Unblock",
 				"user_guid": chat_id
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL())
 
 	def sendPhoto(self, chat_id, file, size, thumbnail=None, caption=None, message_id=None):
@@ -596,13 +507,7 @@ class Bot:
 					"rnd": f"{randint(100000,999999999)}",
 					"reply_to_message_id": message_id
 				},
-				"client":{
-					"app_name":"Main",
-					"app_version":"3.2.1",
-					"platform":"Web",
-					"package":"web.rubika.ir",
-					"lang_code":"fa"
-				}
+				"client":client("3.2.2")
 			}
 		if caption != None: data["input"]["text"] = caption
 
@@ -630,13 +535,7 @@ class Bot:
 					"rnd":f"{randint(100000,999999999)}",
 					"reply_to_message_id":message_id
 				},
-				"client":{
-					"app_name":"Main",
-					"app_version":"3.2.1",
-					"platform":"Web",
-					"package":"web.rubika.ir",
-					"lang_code":"fa"
-				}
+				"client":client("3.2.2")
 			}
 
 		if caption != None: inData["input"]["text"] = caption
@@ -679,13 +578,7 @@ class Bot:
 							"access_hash_rec":access_hash_rec
 						}
 					},
-					"client":{
-						"app_name":"Main",
-						"app_version":"3.2.1",
-						"platform":"Web",
-						"package":"web.rubika.ir",
-						"lang_code":"fa"
-					}
+					"client":client("3.2.2")
 				}))
 			}
 
@@ -749,13 +642,7 @@ class Bot:
 			"input":{
 				"state":time_stamp,
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL()).json().get("data_enc"))).get("data").get("chats")
 
 	def getChatUpdate(self, chat_id):
@@ -766,13 +653,7 @@ class Bot:
 				"object_guid":chat_id,
 				"state":time_stamp
 			},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL()).json().get("data_enc"))).get("data").get("updated_messages")
 
 	def myStickerSet(self):
@@ -780,11 +661,5 @@ class Bot:
 		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
 			"method":"getMyStickerSets",
 			"input":{},
-			"client":{
-				"app_name":"Main",
-				"app_version":"3.2.1",
-				"platform":"Web",
-				"package":"web.rubika.ir",
-				"lang_code":"fa"
-			}
+			"client":client("3.2.2")
 		}))},url=Bot._getURL()).json().get("data_enc"))).get("data")
