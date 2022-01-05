@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'rubika',
   packages = ['rubika'],
-  version = '5.0',
+  version = '5.0.0',
   license='MIT', 
   description = 'rubika library is a unofficial library for making bot in the rubika. this library works with rubika’s API',
   author = 'Bahman Ahmadi',
