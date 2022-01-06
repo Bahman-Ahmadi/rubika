@@ -607,7 +607,7 @@ class Bot:
 					"lang_code":"fa"
 				}
 			}
-		if caption != None: data["input"]["text"] = caption
+		if caption != None: inData["input"]["text"] = caption
 
 		data = {"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps(inData))}
 		return post(json=data,url=Bot._getURL())
@@ -663,10 +663,7 @@ class Bot:
 		file_name = file.split("/")[-1]
 		size = str(Path(file).stat().st_size)
 
-		data = {
-				"api_version":"5",
-				"auth":self.auth,
-				"data_enc":self.enc.encrypt(dumps({
+		inData = {
 					"method":"sendMessage",
 					"input":{
 						"object_guid":chat_id,
@@ -689,10 +686,16 @@ class Bot:
 						"package":"web.rubika.ir",
 						"lang_code":"fa"
 					}
-				}))
-			}
+				}
 
-		if caption != None: data["input"]["text"] = caption
+		if caption != None: inData["input"]["text"] = caption
+	
+		data = {
+			"api_version":"5",
+			"auth":self.auth,
+			"data_enc":self.enc.encrypt(dumps(inData))
+		}
+
 		while True:
 			try:
 				return loads(self.enc.decrypt(loads(post(json=data,url=Bot._getURL()).text)['data_enc']))
