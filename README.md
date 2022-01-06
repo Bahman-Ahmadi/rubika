@@ -27,7 +27,7 @@ enter this command on your command line to install the library
 <h3>use</h3>
 enter this example code in a file or enter line-to-line in the python3 shell:
 <pre lang="py3">
-from rubika import Bot
+from rubika.client import Bot
 
 bot = Bot("AUTH-KEY")
 target = "CHAT-ID"
