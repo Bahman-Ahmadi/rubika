@@ -1,7 +1,7 @@
 from re import findall
 from threading import Thread
 from datetime import datetime
-from client import Bot, Socket
+from rubika.client import Bot, Socket
 
 bot = None
 socket = None

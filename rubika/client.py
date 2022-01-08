@@ -2,7 +2,7 @@ from pathlib import Path
 from requests import post
 from random import randint
 from json import loads, dumps
-import random, datetime, rubika.encryption, websocket, _thread
+import random, datetime, rubika.encryption
 
 # because should be exist !
 adminsAccess = {
@@ -811,6 +811,7 @@ class Socket:
 				"method": "handShake"
 			}))
 
+		import _thread
 		_thread.start_new_thread(handShake, ())
 
 	def on_error(self, ws, error):
@@ -826,6 +827,7 @@ class Socket:
 		return {"code": code, "message": msg}
 
 	def handle(self, OnOpen=None, OnError=None, OnMessage=None, OnClose=None, forEver=True):
+		import websocket
 		ws = websocket.WebSocketApp(
 			"wss://jsocket3.iranlms.ir:80",
 			on_open=OnOpen or Socket(self.auth).on_open,

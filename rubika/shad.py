@@ -4,7 +4,7 @@ from pathlib import Path
 from requests import post
 from random import randint
 from json import loads, dumps
-import random, datetime, rubika.encryption, websocket, _thread
+import random, datetime, rubika.encryption
 
 client = lambda v : {
 	"app_name":"Main",

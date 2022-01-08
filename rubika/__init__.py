@@ -1,1 +1,1 @@
-from rubika.client import Bot
+from rubika.client import *
