@@ -2,7 +2,7 @@ from pathlib import Path
 from requests import post
 from random import randint
 from json import loads, dumps
-import random, datetime, rubika.encryption
+import random, datetime, rubika.encryption, websocket, _thread
 
 # because should be exist !
 adminsAccess = {
@@ -794,3 +794,44 @@ class Bot:
 				"lang_code":"fa"
 			}
 		}))},url=Bot._getURL()).json().get("data_enc"))).get("data")
+
+class Socket:
+	data = {"error":[],"messages":[]}
+
+	def __init__(self, auth):
+		self.auth = auth
+		self.enc = rubika.encryption.encryption(auth)
+
+	def on_open(self, ws):
+		def handShake(*args):
+			ws.send(dumps({
+				"api_version": "4",
+				"auth": self.auth,
+				"data_enc": "",
+				"method": "handShake"
+			}))
+
+		_thread.start_new_thread(handShake, ())
+
+	def on_error(self, ws, error):
+		Socket.data["error"].append(error)
+
+	def on_message(self, ws, message):
+		try:
+			parsedMessage = loads(message)
+			Socket.data["messages"].append({"type": parsedMessage["type"], "data": loads(self.enc.decrypt(parsedMessage["data_enc"]))})
+		except KeyError: pass
+
+	def on_close(self, ws, code, msg):
+		return {"code": code, "message": msg}
+
+	def handle(self, OnOpen=None, OnError=None, OnMessage=None, OnClose=None, forEver=True):
+		ws = websocket.WebSocketApp(
+			"wss://jsocket3.iranlms.ir:80",
+			on_open=OnOpen or Socket(self.auth).on_open,
+			on_message=OnMessage or Socket(self.auth).on_message,
+			on_error=OnError or Socket(self.auth).on_error,
+			on_close=OnClose or Socket(self.auth).on_close
+		)
+
+		if forEver : ws.run_forever()

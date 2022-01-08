@@ -1,13 +1,18 @@
 from re import findall
+from threading import Thread
 from datetime import datetime
+from client import Bot, Socket
 
 bot = None
+socket = None
 lockTime = None
 
 class Tools:
-	def __init__(self, BOT):
+	def __init__(self, auth):
 		global bot
-		bot = BOT
+		global socket
+		bot = Bot(auth)
+		socket = Socket(auth)
 
 	def antiInsult(self, msg):
 		return any(word in open("dontReadMe.txt").read().split("\n") for word in msg.split())
@@ -16,7 +21,7 @@ class Tools:
 		links = list(map(lambda ID: ID.strip()[1:],findall(r"@[\w|_|\d]+", msg))) + list(map(lambda link:link.split("/")[-1],findall(r"rubika\.ir/\w+",msg)))
 		joincORjoing = "joing" in msg or "joinc" in msg
 	
-		if joincORjoing: return joincORjoing
+		if joincORjoing: return True
 		else:
 			for link in links:
 				try:
@@ -33,16 +38,20 @@ class Tools:
 		def __init__(self): pass
 
 		def setLockTime(self, h, m):
+			global lockTime
 			lockTime = f"{h}:{m}"
 
 		def getLockTime(self):
+			global lockTime
 			return lockTime
 	
 		def checkLockTime(self, guid, accesses=[]):
+			global lockTime
 			if datetime.now().strftime("%H:%M") == lockTime:
 				bot.setMembersAccess(guid, accesses)
 	
 		def checkUnlockTime(self, guid, accesses=["ViewMembers","ViewAdmins","SendMessages","AddMember"]):
+			global lockTime
 			if datetime.now().strftime("%H:%M") == lockTime:
 				bot.setMembersAccess(guid, accesses)
 
@@ -65,3 +74,11 @@ class Tools:
 			if i['member_guid'] == member_guid: return True
 
 		return False
+
+	def faster(self, controller):
+		def get(): socket.handle()
+		def use(): controller(socket.data)
+		
+		while True:
+			Thread(target=get).start()
+			Thread(target=use).start()

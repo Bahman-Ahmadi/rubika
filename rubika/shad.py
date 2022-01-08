@@ -1,14 +1,10 @@
 # Thanks For DarkCode
 
-from requests import post
-from random import randint, choice
-from json import loads, dumps
-import asyncio,base64,glob,json,math,urllib3,os,pathlib,random,sys,concurrent.futures,time
-from tqdm import tqdm
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
 from pathlib import Path
-import random, datetime, encryption
+from requests import post
+from random import randint
+from json import loads, dumps
+import random, datetime, rubika.encryption, websocket, _thread
 
 client = lambda v : {
 	"app_name":"Main",
@@ -18,56 +14,19 @@ client = lambda v : {
 	"lang_code":"fa"
 }
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-class encryption:
-    def __init__(self, auth):
-        self.key = bytearray(self.secret(auth), "UTF-8")
-        self.iv = bytearray.fromhex('00000000000000000000000000000000')
-
-    def replaceCharAt(self, e, t, i):
-        return e[0:t] + i + e[t + len(i):]
-
-    def secret(self, e):
-        t = e[0:8]
-        i = e[8:16]
-        n = e[16:24] + t + e[24:32] + i
-        s = 0
-        while s < len(n):
-            e = n[s]
-            if e >= '0' and e <= '9':
-                t = chr((ord(e[0]) - ord('0') + 5) % 10 + ord('0'))
-                n = self.replaceCharAt(n, s, t)
-            else:
-                t = chr((ord(e[0]) - ord('a') + 9) % 26 + ord('a'))
-                n = self.replaceCharAt(n, s, t)
-            s += 1
-        return n
-
-    def encrypt(self, text):
-        raw = pad(text.encode('UTF-8'), AES.block_size)
-        aes = AES.new(self.key, AES.MODE_CBC, self.iv)
-        enc = aes.encrypt(raw)
-        result = base64.b64encode(enc).decode('UTF-8')
-        return result
-
-    def decrypt(self, text):
-        aes = AES.new(self.key, AES.MODE_CBC, self.iv)
-        dec = aes.decrypt(base64.urlsafe_b64decode(text.encode('UTF-8')))
-        result = unpad(dec, AES.block_size).decode('UTF-8')
-        return result
-
-
 class Bot:
 	def __init__(self, auth):
 		self.auth = auth
-		self.enc = encryption(auth)
+		self.enc = rubika.encryption.encryption(auth)
 
 	@staticmethod
 	def _getURL():
+		return "https://messengerg2c64.iranlms.ir/"
+		'''
 		result = []
 		for i in range(11,99): result.append(f"https://shadmessenger{i}.iranlms.ir/")
 		return random.choice(result)
+		'''
 
 	def _requestSendFile(self, file):
 		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
@@ -509,7 +468,7 @@ class Bot:
 				},
 				"client":client("3.2.2")
 			}
-		if caption != None: data["input"]["text"] = caption
+		if caption != None: inData["input"]["text"] = caption
 
 		data = {"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps(inData))}
 		return post(json=data,url=Bot._getURL())
@@ -582,7 +541,7 @@ class Bot:
 				}))
 			}
 
-		if caption != None: data["input"]["text"] = caption
+		if caption != None: inData["input"]["text"] = caption
 		while True:
 			try:
 				return loads(self.enc.decrypt(loads(post(json=data,url=Bot._getURL()).text)['data_enc']))
