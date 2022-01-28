@@ -37,6 +37,13 @@ bot.sendMessage(target, 'YOUR-MESSAGE')
 <br/>
 as result your message will be sent in the target chat.
 <hr/>
+<h3>Thanks For</h3>
+- sajjad dehghani<br/>
+- sajjad soleymani<br/>
+- dark code<br/>
+- mr.binder<br/>
+- shayan<br/>
+- and you :)<br/>
 <h3>documents</h3>
 for reading more about this library, you can visit site:<br/>
 🌐 http://rublib.ir
