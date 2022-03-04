@@ -4,6 +4,6 @@ setup.py
 rubika/__init__.py
 rubika/client.py
 rubika/encryption.py
+rubika/rubino.py
 rubika/shad.py
 rubika/tools.py
-rubika/rubino.py
