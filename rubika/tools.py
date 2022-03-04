@@ -6,6 +6,7 @@ from rubika.client import Bot, Socket
 bot = None
 socket = None
 lockTime = None
+unlockTime = None
 
 class Tools:
 	def __init__(self, auth):
@@ -14,25 +15,32 @@ class Tools:
 		bot = Bot(auth)
 		socket = Socket(auth)
 
-	def antiInsult(self, msg):
+	def hasInsult(self, msg):
 		return any(word in open("dontReadMe.txt").read().split("\n") for word in msg.split())
 	
-	def antiAD(self, msg):
+	def hasAD(self, msg):
+		result = False
 		links = list(map(lambda ID: ID.strip()[1:],findall(r"@[\w|_|\d]+", msg))) + list(map(lambda link:link.split("/")[-1],findall(r"rubika\.ir/\w+",msg)))
 		joincORjoing = "joing" in msg or "joinc" in msg
 	
-		if joincORjoing: return True
+		if joincORjoing: result = True
 		else:
 			for link in links:
 				try:
 					Type = bot.getInfoByUsername(link)["data"]["chat"]["abs_object"]["type"]
-					if Type == "Channel": return True
-				except KeyError: return False
+					if Type == "Channel": result = True
+				except KeyError: result = False
 
-	def antiSpam(self, messages):
-		hasSpam, beforeIter = False, messages[0]
-		for msg in messages[1:]: hasSpam, beforeIter = msg == beforeIter, msg
-		return hasSpam
+		return result
+
+	def hasSpam(self, messages):
+		result, beforeIter = {"isExist":False, "spams":[]}, 0
+		for Iter in range(0,len(messages)):
+			if messages[beforeIter] == messages[Iter] and Iter != beforeIter:
+				result["isExist"] = True
+				result["spams"].append([beforeIter, Iter])
+			beforeIter = Iter
+		return result
 
 	class lockSchedule:
 		def __init__(self): pass
@@ -40,10 +48,18 @@ class Tools:
 		def setLockTime(self, h, m):
 			global lockTime
 			lockTime = f"{h}:{m}"
+	
+		def setUnlockTime(self, h, m):
+			global unlockTime
+			unlockTime = f"{h}:{m}"
 
 		def getLockTime(self):
 			global lockTime
 			return lockTime
+
+		def getUnlockTime(self):
+			global unlockTime
+			return unlockTime
 	
 		def checkLockTime(self, guid, accesses=[]):
 			global lockTime
@@ -82,3 +98,36 @@ class Tools:
 		while True:
 			Thread(target=get).start()
 			Thread(target=use).start()
+
+	def parse(self, mode, text):
+		results = []
+		if mode == "HTML":
+			realText = text.replace("<b>","").replace("</b>","").replace("<i>","").replace("</i>","").replace("<pre>","").replace("</pre>","")
+			bolds = findall("<b>(.*?)</b>",text)
+			italics = findall("<i>(.*?)</i>",text)
+			monos = findall("<pre>(.*?)</pre>",text)
+	
+			bResult = [realText.index(i) for i in bolds]
+			iResult = [realText.index(i) for i in italics]
+			mResult = [realText.index(i) for i in monos]
+			
+			for bIndex,bWord in zip(bResult,bolds):
+				results.append({
+					"from_index": bIndex,
+					"length": len(bWord),
+					"type": "Bold"
+				})
+			for iIndex,iWord in zip(iResult,italics):
+				results.append({
+					"from_index": iIndex,
+					"length": len(iWord),
+					"type": "Italic"
+				})
+			for mIndex,mWord in zip(mResult,monos):
+				results.append({
+					"from_index": mIndex,
+					"length": len(mWord),
+					"type": "Mono"
+				})
+
+		return results

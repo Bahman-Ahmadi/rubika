@@ -6,3 +6,4 @@ rubika/client.py
 rubika/encryption.py
 rubika/shad.py
 rubika/tools.py
+rubika/rubino.py

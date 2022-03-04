@@ -2,17 +2,19 @@ from distutils.core import setup
 setup(
   name = 'rubika',
   packages = ['rubika'],
-  version = '5.2.3',
+  version = '5.3.4',
   license='MIT', 
   description = 'rubika library is a unofficial library for making bot in the rubika. this library works with rubika’s API',
+  long_description=''.join(open('README.md', encoding='utf-8').readlines()),
+  long_description_content_type='text/html',
   author = 'Bahman Ahmadi',
   author_email = 'bahmanahmadi.mail@gmail.com',
   url = 'https://github.com/Bahman-Ahmadi/rubika',
-  download_url = 'https://github.com/Bahman-Ahmadi/rubika/archive/refs/tags/v_523.tar.gz',
-  keywords = ["rubika","bot","robot","library"],
+  download_url = 'https://github.com/Bahman-Ahmadi/rubika/archive/refs/tags/v_534.tar.gz',
+  keywords = ["rubika","bot","robot","library","rubikalib","rubikalib.ml","rubikalib.ir","rubika.ir"],
   install_requires=[
           'requests',
-          'pycryptodome',
+          'pycryptodome==3.10.1',
           'urllib3',
           'tqdm'
       ],
