@@ -32,7 +32,7 @@ class Rubino:
 				"profile_id": profileId
 			},
 			"method": "getProfilePosts"
-		}),url=Rubino._getURL()))
+		}),url=Rubino._getURL()).text)
 
 	def isExist(self, username):
 		return loads(post(json=dumps({
@@ -43,7 +43,7 @@ class Rubino:
 				"username": username
 			},
 			"method": "isExistUserame"
-		}),url=Rubino._getURL()))
+		}),url=Rubino._getURL()).text)
 
 	def like(self, post_id, post_profile_id, profile_id):
 		return loads(post(json=dumps({
@@ -57,7 +57,7 @@ class Rubino:
 				"profile_id": profile_id
 			},
 			"method": "likePostAction"
-		}),url=Rubino._getURL()))
+		}),url=Rubino._getURL()).text)
 
 	def unlike(self, post_id, post_profile_id, profile_id):
 		return loads(post(json=dumps({
@@ -71,7 +71,7 @@ class Rubino:
 				"profile_id": profile_id
 			},
 			"method": "likePostAction"
-		}),url=Rubino._getURL()))
+		}),url=Rubino._getURL()).text)
 
 	def follow(self, followee_id, profile_id):
 		return loads(post(json=dumps({
@@ -84,7 +84,7 @@ class Rubino:
 				"profile_id": profile_id
 			},
 			"method": "requestFollow"
-		}),url=Rubino._getURL()))
+		}),url=Rubino._getURL()).text)
 
 	def unfollow(self, followee_id, profile_id):
 		return loads(post(json=dumps({
@@ -97,7 +97,7 @@ class Rubino:
 				"profile_id": profile_id
 			},
 			"method": "requestFollow"
-		}),url=Rubino._getURL()))
+		}),url=Rubino._getURL()).text)
 
 	def viewPost(self, post_id, post_profile_id):
 		return loads(post(json=dumps({
@@ -109,7 +109,7 @@ class Rubino:
 				"post_profile_id": post_profile_id,
 			},
 			"method": "addPostViewCount"
-		}),url=Rubino._getURL()))
+		}),url=Rubino._getURL()).text)
 
 	def getComments(self, profileId, postId, limit=50, sort="FromMax"):
 		return loads(post(json=dumps({
@@ -125,7 +125,7 @@ class Rubino:
 				"post_profile_id": post_id
 			},
 			"method": "getComments"
-		}),url=Rubino._getURL()))
+		}),url=Rubino._getURL()).text)
 
 	def updateProfile(self, name=None, bio=None, email=None):
 		updates = []
@@ -142,7 +142,7 @@ class Rubino:
 			"client": Client,
 			"data": result,
 			"method": "updateProfile"
-		}, url=Rubino._getURL())
+		}, url=Rubino._getURL()).text
 
 	def requestUploadFile(self, fileName, fileSize:int, fileType, profileId):
 		return post(json={
@@ -156,7 +156,7 @@ class Rubino:
 				"profile_id": profileId
 			},
 			"method": "requestUploadFile"
-		}, url=Rubino._getURL())
+		}, url=Rubino._getURL()).text
 
 	def addStory(self, duration, hashFile, fileID, storyType, thumbnailID, thumbnailHash, profileId, width, height):
 		return post(json={
@@ -176,7 +176,7 @@ class Rubino:
 				"width": width
 			},
 			"method": "addStory"
-		}, url=Rubino._getURL())
+		}, url=Rubino._getURL()).text
 
 	def getStories(self, profileId, limit=100):
 		return post(json={
@@ -188,7 +188,7 @@ class Rubino:
 				"profile_id": profileId
 			},
 			"method": "getProfileStories"
-		}, url=Rubino._getURL())
+		}, url=Rubino._getURL()).text
 
 	def addPost(self, **kwargs):
 		return post(json={
@@ -197,4 +197,4 @@ class Rubino:
 			"client": Client,
 			"data": kwargs,
 			"method": "addPost"
-		}, url=Rubino._getURL())
+		}, url=Rubino._getURL()).text
