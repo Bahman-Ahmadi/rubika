@@ -2,15 +2,15 @@ from distutils.core import setup
 setup(
   name = 'rubika',
   packages = ['rubika'],
-  version = '5.3.5',
+  version = '5.4.5',
   license='MIT', 
   description = 'rubika library is a unofficial library for making bot in the rubika. this library works with rubika’s API',
   long_description='docs are ready at rubikalib.ml',
-  long_description_content_type='text/markdown',
+  long_description_content_type='text/html',
   author = 'Bahman Ahmadi',
   author_email = 'bahmanahmadi.mail@gmail.com',
   url = 'https://github.com/Bahman-Ahmadi/rubika',
-  download_url = 'https://github.com/Bahman-Ahmadi/rubika/archive/refs/tags/v_535.tar.gz',
+  download_url = 'https://github.com/Bahman-Ahmadi/rubika/archive/refs/tags/v_545.tar.gz',
   keywords = ["rubika","bot","robot","library","rubikalib","rubikalib.ml","rubikalib.ir","rubika.ir"],
   install_requires=[
           'requests',

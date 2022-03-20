@@ -49,13 +49,14 @@ defaultDevice = {
 	"token_type":"Firebase"
 }
 
-__version__ = "5.3.4"
+__version__ = "5.4.5"
 __license__ = "MIT license"
 __copyright__ = "Copyright (C) 2022 Bahman Ahmadi <github.com/Bahman-Ahmadi>"
 
 class Bot:
 	def __init__(self, app_name, phone_number=None, auth=None, displayWelcome=True, device=defaultDevice):
 		if displayWelcome : print(f"rubika library version {__version__}\n{__copyright__}\n☞ docs : http://rubikalib.ml\n\nexecuting codes...\n")
+		self.app_name = app_name
 		
 		try:
 			with open(f"{app_name}.json", "r") as account:
@@ -381,6 +382,15 @@ class Bot:
 		width, height = im.size
 		return [width , height]
 
+	def getChats(self, start_id=None):
+		return loads(self.enc.decrypt(post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
+			"method":"getChats",
+			"input":{
+				"start_id":start_id
+			},
+			"client": clients.web
+		}))},url=Bot._getURL()).json()["data_enc"]))
+
 	def sendMessage(self, chat_id, text, metadata=[], parse_mode=None, message_id=None):
 		inData = {
 			"method":"sendMessage",
@@ -456,7 +466,7 @@ class Bot:
 		}))},url=Bot._getURL()).json().get("data_enc")))
 
 	def banGroupMember(self, chat_id, user_id):
-		return loads(enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
+		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
 			"method":"banGroupMember",
 			"input":{
 				"group_guid": chat_id,
@@ -540,7 +550,7 @@ class Bot:
 					},
 					"client": clients.web
 			}))
-		}, url=Bot._getURL()).json()["data_enc"]))["data"]["in_chat_members"]
+		}, url=Bot._getURL()).json()["data_enc"]))
 
 	def getGroupInfo(self, chat_id):
 		return loads(self.enc.decrypt(post(
@@ -659,7 +669,7 @@ class Bot:
 			 	"object_guid": chat_id
 			 })),
 			"method": "setPinMessage"
-		},url=Bot._getURL()).json()["data_enc"]))
+		},url=Bot._getURL())))
 
 	def unpin(self, chat_id, message_id):
 		return loads(self.enc.decrypt(post(json={"api_version": "4", "auth": self.auth, "client": clients.android,
@@ -850,7 +860,7 @@ class Bot:
 			"method":"sendMessage"
 		},url=Bot._getURL()).json()["data_enc"]))
 
-	def searchInChannelMembers(self, text, channel_guid):
+	def getChannelMembers(self, channel_guid, text=None, start_id=None):
 		try:
 			return loads(self.enc.decrypt(post(json={
 				"api_version":"4",
@@ -858,10 +868,11 @@ class Bot:
 				"client": clients.android,
 				"data_enc":self.enc.encrypt(dumps({
 					"channel_guid": channel_guid,
-					"search_text": text
+					"search_text": text,
+					"start_id": start_id
 				})),
 				"method":"getChannelAllMembers"
-			},url=Bot._getURL()).json()["data_enc"]))["in_chat_members"]
+			},url=Bot._getURL()).json()["data_enc"]))
 
 		except KeyError: return None
 
@@ -907,20 +918,20 @@ class Bot:
 			"client": clients.web
 		}))},url=Bot._getURL()).json()["data_enc"]))
 
-	def startVoiceChat(self, chat_id):
+	def startVoiceChat(self, chat_id, on="Group"):
 		return loads(self.enc.decrypt(post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
-			"method":"createGroupVoiceChat",
+			"method":f"create{on}VoiceChat",
 			"input":{
-				"object_guid":chat_id,
+				f"{on.lower()}_guid":chat_id,
 			},
 			"client": clients.web
 		}))},url=Bot._getURL()).json()["data_enc"]))	
 
-	def editVoiceChat(self, chat_id,voice_chat_id, title):
+	def editVoiceChat(self, chat_id,voice_chat_id, title, on="Group"):
 		return loads(self.enc.decrypt(post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
-			"method":"setGroupVoiceChatSetting",
+			"method":f"set{on}VoiceChatSetting",
 			"input":{
-				"object_guid":chat_id,
+				f"{on.lower()}_guid":chat_id,
 				"voice_chat_id" : voice_chat_id,
 				"title" : title ,
 				"updated_parameters": ["title"]
@@ -928,11 +939,11 @@ class Bot:
 			"client": clients.web
 		}))},url=Bot._getURL()).json()["data_enc"]))
 
-	def finishVoiceChat(self, chat_id, voice_chat_id):
+	def finishVoiceChat(self, chat_id, voice_chat_id, on="Group"):
 		return loads(self.enc.decrypt(post(json={"api_version":"5","auth":self.auth,"data_enc":self.enc.encrypt(dumps({
-			"method":"discardGroupVoiceChat",
+			"method":f"discard{on}VoiceChat",
 			"input":{
-				"object_guid":chat_id,
+				f"{on.lower()}_guid":chat_id,
 				"voice_chat_id" : voice_chat_id,
 			},
 			"client": clients.web
@@ -962,7 +973,7 @@ class Bot:
 		if dl == "message":
 			message = kwargs["message"]
 			if type(message) != dict:
-				message = Bot(self.app_name, displayWelcome=False).getMessagesInfo(kwargs["chat_id"], [str(message)])[0]
+				message = Bot(self.app_name, auth=self.auth, displayWelcome=False).getMessagesInfo(kwargs["chat_id"], [str(message)])[0]
 			fileID = str(message["file_inline"]["file_id"])
 			size = message["file_inline"]["size"]
 			dc_id = str(message["file_inline"]["dc_id"])
@@ -985,7 +996,6 @@ class Bot:
 			while True:
 				try:
 					result += get(url=server,headers=header).content
-					#j = loads(j)['data']['access_hash_rec']
 					break
 				except Exception as e:
 					print (e)
@@ -1058,7 +1068,7 @@ class Bot:
 				"is_mute": False,
 				"rnd": randint(100000,999999999),
 				"file_inline": {
-					"access_hash_rec": upload[1],
+					"access_hash_rec": access_hash_rec,
 					"dc_id": dc_id,
 					"file_id": file_id,
 					"auto_play": False,
@@ -1094,7 +1104,7 @@ class Bot:
 				"poll_id": poll_id,
 				"selection_index": option_index
 			})),
-			"method": "createPoll"
+			"method": "votePoll"
 		}, url=Bot._getURL()).json()["data_enc"]))
 
 	def deleteChatHistory(self, chat_id, lastMessageId):
@@ -1130,7 +1140,7 @@ class Bot:
 		}))},url=Bot._getURL()).json()["data_enc"]))
 
 	def getPollOptionVoters(self, poll_id, option_index, start_id=None):
-		response = loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
+		return loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
 			"method":"getPollOptionVoters",
 			"input":{
 				"poll_id":poll_id,
@@ -1140,29 +1150,8 @@ class Bot:
 			"client": clients.web
 		}))},url=Bot._getURL()).json()["data_enc"]))["data"]
 
-		if not response["has_continue"]: return response["voters_abs_objects"]
-		else:
-			result = []
-			while True:
-				if response["has_continue"]:
-					res = loads(self.enc.decrypt(post(json={"api_version":"5","auth": self.auth,"data_enc":self.enc.encrypt(dumps({
-						"method":"getPollOptionVoters",
-						"input":{
-							"poll_id":poll_id,
-							"selection_index": option_index,
-							"start_id": response["next_start_id"]
-						},
-						"client": clients.web
-					}))},url=Bot._getURL()).json()["data_enc"]))
-					#print(res)
-					result.append([i for i in res["voters_abs_objects"]])
-					response = res
-				else:
-					break
-			return result
-
 	def getMe(self):
-		return Bot(self.app_name, displayWelcome=False).getUserInfo(loads(open(self.app_name+".json","rt").read()).get("data").get("user").get("user_guid"))
+		return Bot(self.app_name, auth=self.auth, displayWelcome=False).getUserInfo(loads(open(self.app_name+".json","rt").read()).get("data").get("user").get("user_guid"))
 
 class Socket:
 	data = {"error":[],"messages":[]}

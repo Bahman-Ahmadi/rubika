@@ -178,7 +178,7 @@ class Rubino:
 			"method": "addStory"
 		}, url=Rubino._getURL())
 
-	def getStories(self, profileId, limit=100);
+	def getStories(self, profileId, limit=100):
 		return post(json={
 			"api_version": "0",
 			"auth": self.auth,
@@ -195,6 +195,6 @@ class Rubino:
 			"api_version": "0",
 			"auth": self.auth,
 			"client": Client,
-			"data": **kwargs,
+			"data": kwargs,
 			"method": "addPost"
 		}, url=Rubino._getURL())
