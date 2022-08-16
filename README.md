@@ -1,48 +1,78 @@
-<h1>rubika</h1>
-<br />
-this is a <b>unofficial</b> library for making bots in rubika
-using this library you can make your own rubika bot and control that
-those bots that makes with this library, will be run on your account;
-so you should get your account's <b>API key</b>.
-<hr />
-<h3>Introductions</h3>
-1. unix or windows system<br/>
-2. python 3<br/>
-3. libraries :<br/>
-- pycryptodome<br/>
-- requests<br/>
-- urllib3<br/>
-- tqdm<br/>
-<br/>
-<i>note: libraries automatically will be installed when you install rubika library</i>
-<hr/>
-<h3>Install</h3>
-enter this command on your command line to install the library
-<pre lang="bash">pip install rubika</pre>
-<br/>
-<i>first introductions will be installed then rubika library</i>
-<hr/>
-<h3>Use</h3>
-enter this example code in a file or enter line-to-line in the python3 shell:
-<pre lang="py3">
-from rubika.client import Bot
+<p align="center">
+    <a href="https://github.com/bahman-ahmadi/rubika">
+        <img src="https://rubikalib.github.io/assets/logo.png" alt="RUBIKA" width="128">
+    </a>
+    <br>
+    <b>Rubika Bot Self Library for Python</b>
+    <br>
+    <a href="https://rubikalib.github.io">
+        Homepage
+    </a>
+    •
+    <a href="https://rubikalib.github.io/docs.html">
+        Documentation
+    </a>
+    •
+    <a href="https://t.me/rubikalibGP">
+        Community
+    </a>
+    •
+    <a href="https://t.me/rubikalib">
+        News
+    </a>
+</p>
 
-bot = Bot("AUTH-KEY")
-target = "CHAT-ID"
+## Rubika
 
-bot.sendMessage(target, 'YOUR-MESSAGE')
-</pre>
-<br />
-as result your message will be sent in the target chat.
-<hr />
-<h3>Documents</h3>
-for reading more about this library, you can visit the <a href="http://rubikalib.ml">site</a>
-<hr />
-<h3>Thanks For (A-Z)</h3>
-- Dark Code<br/>
-- Mr.binder<br/>
-- Sajjad Dehghani<br/>
-- Sajjad Soleymani<br/>
-- Saleh (maven)<br/>
-- Shayan Ghosi<br/>
+> easy, fast and elegant library for making rubika self bots
+
+``` python
+from rubika import Bot, Socket
+from rubika.filters import filters
+
+bot = Bot("MyApp")
+app = Socket(bot.auth)
+
+@app.handler(filters.PV)
+def hello(message):
+    message.reply("Hello from Rubikalib!")
+```
+
+**Rubika** is an easy, fast and unofficial [rubika](https://rubika.ir) self bot library.
+It enables you to easily interact with the main Telegram API through a user account (custom client) using Python.
+
+### Key Features
+
+- **Ready**: Install rubika with pip and start building your applications right away.
+- **Easy**: Makes the rubika API simple and intuitive, while still allowing advanced usages.
+- **Elegant**: Low-level details are abstracted and re-presented in a more convenient way.
+- **Fast**: Boosted up by aiohttp instead of requests.
+- **Powerful**: Full access to Rubika's API to execute any official client action and more.
+
+### Installing
+
+``` bash
+pip3 install rubika
+```
+
+### Thanks For (A-Z)
+- Dark Code
+- Mr.binder
+- Sajjad Dehghani
+- Sajjad Soleymani
+- Saleh (maven)
+- Shayan Ghosi
 - And you :)
+
+### Resources
+
+- Check out the docs at https://rubikalib.github.io/docs.html to learn more about rubika library, get started right
+away and discover more in-depth material for building your client applications.
+- Join the official channel at https://t.me/rubikalib and stay tuned for news, updates and announcements.
+
+### License
+rubika library is licensed under [GPLv3 license](https://github.com/bahman-ahmadi/rubika/blob/main/LICENSE)
+
+This is not an official rubika product. It is not affiliated with nor endorsed by rubika Inc.
+
+© 2022 Bahman Ahmadi
