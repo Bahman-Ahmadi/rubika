@@ -1,5 +1,5 @@
-from rubika.exceptions import InvalidInput
-from rubika.configs import makeData
+from exceptions import InvalidInput
+from configs import makeData
 from rubika.tools import Tools
 
 class DictToClass:

@@ -53,7 +53,6 @@ class visibility:
 	MYCONTACTS = "MyContacts"
 	NOBODY     = "Nobody"
 
-randStr = lambda length, choices=[*ascii_lowercase, *ascii_uppercase, *digits, *"-_"]: "".join(sample(choices, length))
 randStr = lambda length, choices=[*ascii_lowercase, *ascii_uppercase, *digits, *"-_"]: "".join([choice(choices) for i in range(length)])
 
 defaultDevice = {
@@ -75,26 +74,20 @@ def post(json:dict, method, url:str=None, platform="rubika", enc:encryption=None
 					async with session.post(url, json=data) as response:
 						response = await response.text()
 						response = loads(str(enc.decrypt(loads(response).get("data_enc")))) if "data_enc" in loads(response).keys() and isEncrypted else loads(response)
-						if type(response) == dict:
-							if "status" in response.keys() and response.get("status") != "OK":
-								if response.get("status_det") == "NOT_REGISTERED":
-									print( data, url, response )
-									raise NotRegistered("the auth is incorrect. please sure about your account's health then login again.")
-								elif response.get("status_det") == "INVALID_INPUT" :
-									print( data, url, response )
-									raise InvalidInput(f"the inserted argument(s) is invaild in the {platform}/{method}. if you're sure about your argument(s), please report this message.")
-								elif response.get("status_det") == "TOO_REQUESTS" :
-									print( data, url, response )
-									raise TooRequests(f"the {platform}/{method} method has been limited. please try again later.")
-								elif response.get("status_det") == 'INVALID_AUTH':
-									print( data, url, response )
-									raise InvaildAuth(f"the inserted argument(s) in {platform}/{method} is vaild but is not related to other argument(s) or maybe for other reasons, anyway now this method can't run on server. please don't enter fake argument(s) and fix anything can return this exception")
-							else:
-								return response
-						elif type(response) == str and response.startswith("<!DOCTYPE"):
-							post(json, method, url=url, platform=platform, enc=enc, isEncrypted=isEncrypted)
+						if "status" in response.keys() and response.get("status") != "OK":
+							print( data, url, response )
+							if response.get("status_det") == "NOT_REGISTERED":
+								raise NotRegistered("the auth is incorrect. please sure about your account's health then login again.")
+							elif response.get("status_det") == "INVALID_INPUT" :
+								raise InvalidInput(f"the inserted argument(s) is invaild in the {platform}/{method}. if you're sure about your argument(s), please report this message.")
+							elif response.get("status_det") == "TOO_REQUESTS" :
+								raise TooRequests(f"the {platform}/{method} method has been limited. please try again later.")
+							elif response.get("status_det") == 'INVALID_AUTH':
+								raise InvaildAuth(f"the inserted argument(s) in {platform}/{method} is vaild but is not related to other argument(s) or maybe for other reasons, anyway now this method can't run on server. please don't enter fake argument(s) and fix anything can return this exception")
+						else:
+							return response
 			except decoder.JSONDecodeError: ...
-			except client_exceptions.ClientConnectorError: ...
+			except client_exceptions.ClientConnectorError: url = _getURL(dc_id=64)
 	return run(POST(url or _getURL(dc_id=64), json))
 
 def _getURL(DCsURL:str="https://messengerg2cX.iranlms.ir/", getDCsURL:str="https://getdcmess.iranlms.ir", dc_id:int=None):
@@ -148,10 +141,6 @@ def makeRubinoData(auth:str, method:str, data:dict) -> dict:
 		"method" : method
 	}
 	return post(outerJson, method, url="https://rubino12.iranlms.ir/", platform="rubino", isEncrypted=False)
-
-def makeWSData(ws, auth:str, method:str, data:dict) :
-	enc = encryption(auth)
-	return ws.send(dumps({"api_version": "4","auth": auth,"data_enc": enc.encrypt(dumps(data)),"method": method}))
 
 tmpGeneration = lambda: randStr(32, [*ascii_lowercase, *digits])
 

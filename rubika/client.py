@@ -184,17 +184,17 @@ class Bot:
 
 	def sendVideo(self, chat_id:str, file:str, width:int=720, height:int=720, metadata:list=None, parse_mode:str=None, caption=None, message_id=None, uresponse:list=None):
 		from tinytag import TinyTag # pip install tinytag
-		uresponse, metadata, caption = uresponse or Bot.uploadFile(self, file), Bot.loadMetadata(metadata, parse_mode, caption)
+		uresponse, metadata, caption = uresponse or Bot.uploadFile(self, file), *Bot.loadMetadata(metadata, parse_mode, caption)
 		return Bot._create(4, self.auth, "sendMessage", {"file_inline":{"access_hash_rec":uresponse[1],"auto_play":False,"dc_id":uresponse[0]["dc_id"],"file_id":str(uresponse[0]["id"]),"file_name":file.split("/")[-1],"height":height,"mime":file.split(".")[-1],"size":str(len(GET(file).content if "http" in file else open(file,"rb").read())),"thumb_inline":file,"time":round(TinyTag.get(file).duration * 1000),"type":"Video","width":width},"is_mute":False,"object_guid":chat_id, "text": caption, "metadata": metadata, "rnd":str(randint(100000,999999999)), "reply_to_message_id":message_id})
 
 	def sendMusic(self, chat_id:str, file:str, metadata:list=None, parse_mode:str=None, caption=None, message_id=None, uresponse:list=None):
 		from tinytag import TinyTag # pip install tinytag
-		uresponse, metadata, caption = uresponse or Bot.uploadFile(self, file), Bot.loadMetadata(metadata, parse_mode, caption)
+		uresponse, metadata, caption = uresponse or Bot.uploadFile(self, file), *Bot.loadMetadata(metadata, parse_mode, caption)
 		return Bot._create(4, self.auth, "sendMessage", {"file_inline":{"access_hash_rec":uresponse[1], "auto_play":False, "dc_id":uresponse[0]["dc_id"], "file_id":str(uresponse[0]["id"]),"file_name":file.split("/")[-1],"height":0.0,"mime":file.split(".")[-1],"music_performer": str(TinyTag.get(file).artist),"size": len(GET(file).content if "http" in file else open(file,"rb").read()),"time": round(TinyTag.get(file).duration),"type":"Music","width":0.0},"is_mute":False,"object_guid":chat_id, "text": caption, "metadata": metadata,"rnd":randint(100000,999999999),"reply_to_message_id":message_id})
 
 	def sendVoice(self, chat_id:str, file:str, time:int=None, metadata:list=None, parse_mode:str=None, caption:str=None, message_id=None, uresponse:list=None) -> dict :
 		# file's format must be ogg. time must be ms (type: float).
-		uresponse, metadata, caption = uresponse or Bot.uploadFile(self, file), Bot.loadMetadata(metadata, parse_mode, caption)
+		uresponse, metadata, caption = uresponse or Bot.uploadFile(self, file), *Bot.loadMetadata(metadata, parse_mode, caption)
 		if time is None:
 			from tinytag import TinyTag # pip install tinytag
 			time = round(TinyTag.get(file).duration)
@@ -202,13 +202,13 @@ class Bot:
 
 	def sendDocument(self, chat_id:str, file:str, caption:str=None, metadata:list=None, parse_mode:str = None, message_id=None, uresponse:list=None) -> dict :
 		# Bot.sendDocument("guid","./file.txt", caption="anything", message_id="12345678")
-		uresponse, metadata, caption = uresponse or Bot.uploadFile(self, file), Bot.loadMetadata(metadata, parse_mode, caption)
+		uresponse, metadata, caption = uresponse or Bot.uploadFile(self, file), *Bot.loadMetadata(metadata, parse_mode, caption)
 		return Bot._create(5, self.auth, "sendMessage", {"object_guid":chat_id, "metadata": metadata, "text": caption, "reply_to_message_id":message_id,"rnd":f"{randint(100000,999999999)}","file_inline":{"dc_id":str(uresponse[0]["dc_id"]),"file_id":str(uresponse[0]["id"]),"type":"File","file_name":file.split("/")[-1],"size":len(GET(file).content if "http" in file else open(file,"rb").read()),"mime":file.split(".")[-1],"access_hash_rec":uresponse[1]}})
 
 	sendLocation = lambda self, chat_id, location, message_id: Bot._create(4, self.auth, "sendMessage", {"is_mute": False,"object_guid":chat_id,"rnd":f"{randint(100000,999999999)}","location":{"latitude": location[0],"longitude": location[1]},"reply_to_message_id":message_id})
 
 	def sendGIF(self, chat_id:str, file:str, width:int, height:int, time:int=None, metadata:list=None, parse_mode:str=None, thumbnail:str=r"/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDACAWGBwYFCAcGhwkIiAmMFA0MCwsMGJGSjpQdGZ6eHJm\ncG6AkLicgIiuim5woNqirr7EztDOfJri8uDI8LjKzsb/2wBDASIkJDAqMF40NF7GhHCExsbGxsbG\nxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsb/wAARCAAyADIDASIA\nAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA\nAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3\nODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm\np6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA\nAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx\nBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK\nU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3\nuLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDXqCXo\nasVXk70DKwHNSBaRRzUgrnZqMUfMKtkcCq24KcmntdxgDmtIEyJ8UVB9ti9aKskmB4qJ/uk1L2qC\nZtsZpiII5P3hB6VDLOySZ7UyVJDEWWoXLGD5uoqFHQtvUnln3rkVB5bv3qqk3Y1filUKM09kCV2R\nfZ39aKtectFK7K5URwagzrila4klcJiqdtbsrA5q+jLE4ZhVXsyErq5bCFYAMVQuVYKVC9av/akc\ncGmy4ZeKaIaZgeWVlANX1jDKKbdRYYNQJQqdamRpAk8pfWiq/n+9FSWPtifM61LcdKKKctyIbEMJ\nO4c1oj7lFFUiWQXH+qNZLmiihjiNzRRRUlH/2Q==\n", caption:str=None, message_id:int=None, uresponse:list=None) -> dict :
-		uresponse, metadata, caption = uresponse or Bot.uploadFile(self, file), Bot.loadMetadata(metadata, parse_mode, caption)
+		uresponse, metadata, caption = uresponse or Bot.uploadFile(self, file), *Bot.loadMetadata(metadata, parse_mode, caption)
 		if time is None :
 			from tinytag import TinyTag # pip install TinyTag
 			time = round(TinyTag.get(file).duration * 1000)
