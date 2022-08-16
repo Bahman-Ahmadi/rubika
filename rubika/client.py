@@ -11,8 +11,8 @@ from rubika.tools      import Tools
 from rubika.encryption import encryption
 from rubika.configs    import makeData, makeTmpData, defaultDevice, _getURL, welcome
 
-__version__   = "6.0.0"
-__license__   = "GPLv3 license"
+__version__ = "6.0.0"
+__license__ = "GPLv3 license"
 __copyright__ = "Copyright (C) 2022 Bahman Ahmadi <github.com/Bahman-Ahmadi>"
 
 class Bot:
