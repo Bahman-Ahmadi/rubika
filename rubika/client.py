@@ -9,11 +9,10 @@ from rubika.fileIO     import *
 from rubika.filters    import *
 from rubika.tools      import Tools
 from rubika.encryption import encryption
-from rubika.configs    import makeData, makeTmpData, defaultDevice, _getURL, welcome
+from rubika.configs    import makeData, makeTmpData, defaultDevice, _getURL, welcome, __version__, __license__, __copyright__
 
-__version__ = "6.0.0"
-__license__ = "GPLv3 license"
-__copyright__ = "Copyright (C) 2022 Bahman Ahmadi <github.com/Bahman-Ahmadi>"
+shownWelcome  = False
+if not shownWelcome: welcome(f"rubika library version {__version__}\n{__copyright__}\n→ docs : https://rubikalib.github.io\n")
 
 class Bot:
 	downloadURL = "https://messengerX.iranlms.ir/GetFile.ashx"
@@ -22,8 +21,8 @@ class Bot:
 	wsURL       = "wss://msocket1.iranlms.ir:80"
 
 	def __init__(self, appName:str, auth:str=None, phoneNumber:str=None, wantRegister:bool=True, device:dict=defaultDevice, appType="rubika"):
-		welcome(f"rubika library version {__version__}\n{__copyright__}\n→ docs : https://rubikalib.github.io\n\nexecuting codes...\n")
-		self.appName, self.appType = appName, appType.lower()
+		welcome(f"executing codes on the {appType}...")
+		self.appName, self.appType, shownWelcome = appName, appType.lower(), True
 		if self.appType.lower() == "shad": Bot.setAsShad(self)
 
 		if auth is not None and len(auth) == 32 : self.auth = auth
@@ -261,11 +260,12 @@ class Socket:
 		self.auth, self.enc, self.proxy, self.logging = auth, encryption(auth), proxy, logging
 
 	def on_open(self, ws):
-		welcome(f"rubika library version {__version__}\n{__copyright__}\n→ docs : https://rubikalib.github.io\n\nconnecting socket...\n")
+		welcome("connecting socket...")
+		shownWelcome = True
 		handShake = lambda *args: ws.send(dumps({"api_version": "4","auth": self.auth,"data_enc": "","method": "handShake"}))
 		Thread(target=handShake, args=()).start()
 
-	on_error = lambda self, ws, error:     print(error)
+	on_error = lambda self, ws, error:     print(error) if self.logging else None
 	on_close = lambda self, ws, code, msg: print({"code": code, "message": msg}) if self.logging else None
 	on_ping  = lambda self, ws, msg :      print("ping") if self.logging else None
 	on_pong  = lambda self, ws, msg :      print("pong") if self.logging else None

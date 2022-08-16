@@ -7,6 +7,8 @@ from string  import ascii_lowercase, ascii_uppercase, digits
 from rubika.encryption import encryption
 from rubika.exceptions import *
 
+__version__ , __license__ , __copyright__ = "6.0.2" , "GPLv3 license" , "Copyright (C) 2022 Bahman Ahmadi <github.com/Bahman-Ahmadi>"
+
 class accesses:
 	class admin:
 		pin               = "PinMessages"
@@ -145,13 +147,12 @@ def makeRubinoData(auth:str, method:str, data:dict) -> dict:
 tmpGeneration = lambda: randStr(32, [*ascii_lowercase, *digits])
 
 def welcome(text, time:float=0.035):
-	if __file__.split("/")[-2] != "rubika":
-		from time import sleep
-		try:
-			from rich import print
-			print(text)
-		except ModuleNotFoundError:
-			for char in text:
-				print(char, end='', flush=True)
-				sleep(float(time))
-		print()
+	from time import sleep
+	try:
+		from rich import print
+		print(text)
+	except ModuleNotFoundError:
+		for char in text:
+			print(char, end='', flush=True)
+			sleep(float(time))
+	print()
