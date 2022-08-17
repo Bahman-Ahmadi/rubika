@@ -13,10 +13,11 @@ class Rubino:
 
 	follow            = lambda self, followee_id: makeRubinoData(self.auth, "requestFollow", {"f_type": "Follow", "followee_id": followee_id, "profile_id": self.profileID})
 	
-	getStories        = lambda self, targetProfileID, limit=100                      : makeRubinoData(self.auth, "getProfileStories", {"limit": limit, "profile_id": targetProfileID})
-	getProfilePosts   = lambda self, targetProfileID, limit=51, sort="FromMax"       : makeRubinoData(self.auth, "getProfilePosts", {"equal": False, "limit": limit, "sort": sort, "target_profile_id": targetProfileID, "profile_id": self.profileID})
-	getRecentPosts    = lambda self, equal=False, limit=30, sort="FromMax"           : makeRubinoData(self.auth, "getRecentFollowingPosts", {"equal": equal, "limit": limit, "sort": sort, "profile_id": self.profileID})
-	getComments       = lambda self, postID, postProfileID, limit=50, sort="FromMax" : makeRubinoData(self.auth, "getComments", {"equal": False, "limit": limit, "sort": sort, "post_id": postID, "profile_id": self.profileID, "post_profile_id": postProfileID})
+	getStories         = lambda self, targetProfileID, limit=100                      : makeRubinoData(self.auth, "getProfileStories", {"limit": limit, "profile_id": targetProfileID})
+	getProfilePosts    = lambda self, targetProfileID, limit=51, sort="FromMax"       : makeRubinoData(self.auth, "getProfilePosts", {"equal": False, "limit": limit, "sort": sort, "target_profile_id": targetProfileID, "profile_id": self.profileID})
+	getRecentPosts     = lambda self, equal=False, limit=30, sort="FromMax"           : makeRubinoData(self.auth, "getRecentFollowingPosts", {"equal": equal, "limit": limit, "sort": sort, "profile_id": self.profileID})
+	getComments        = lambda self, postID, postProfileID, limit=50, sort="FromMax" : makeRubinoData(self.auth, "getComments", {"equal": False, "limit": limit, "sort": sort, "post_id": postID, "profile_id": self.profileID, "post_profile_id": postProfileID})
+	getPostByShareLink = lambda self, shareString                                     : makeRubinoData(self.auth, "getPostByShareLink", {"share_string": shareString, "profile_id": self.profileID})
 
 	isExist           = lambda self, username: makeRubinoData(self.auth, "isExistUsername", {"username": username.replace('@','')})
 
