@@ -268,7 +268,7 @@ class Socket:
 		def wrapper(func):
 			import websocket
 
-			Socket.func, Socket.appliedFilters, Socket.filtersType, Socket.chats, Socket.noChats = func, args, kwargs.get("Type") or types.ALL, kwargs.get("chats") or [], kwargs.get("blacklist")
+			Socket.func, Socket.appliedFilters, Socket.filtersType, Socket.chats, Socket.noChats = func, args, kwargs.get("Type") or types.ALL, kwargs.get("chats") or [], kwargs.get("blacklist") or []
 			try: Bot.wsURL = choice(list(GET(Bot.getDCsURL).json()["data"]["socket"].values()))
 			except exceptions.ConnectionError: ...
 			ws = websocket.WebSocketApp(Bot.wsURL, on_open = Socket(self.auth).on_open, on_message = Socket(self.auth).on_message, on_error = Socket(self.auth).on_error, on_close = Socket(self.auth).on_close, on_ping = Socket(self.auth).on_ping, on_pong = Socket(self.auth).on_pong)
