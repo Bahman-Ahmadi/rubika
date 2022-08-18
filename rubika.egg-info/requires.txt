@@ -3,4 +3,5 @@ pycryptodome==3.10.1
 urllib3
 tqdm
 aiohttp
+rich
 websocket-client
