@@ -1,5 +1,5 @@
-from exceptions import InvalidInput
-from configs import makeData
+from rubika.exceptions import InvalidInput
+from rubika.configs import makeData
 from rubika.tools import Tools
 
 class DictToClass:
@@ -48,9 +48,9 @@ class Message:
 
 	def show(self) -> dict:
 		try:
-			from rich import print
-			print(ClassToDict(self.data))
-		except ImportError:
+			from rich import print as Print
+			Print(ClassToDict(self.data))
+		except MoudleNotFoundError:
 			print(ClassToDict(self.data))
 
 	def reply(self, text:str, metadata:list=[], parseMode:str=None) -> dict:

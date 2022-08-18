@@ -5,8 +5,8 @@ from rubika.configs import makeRubinoData, welcome, __version__, __license__, __
 
 class Rubino:
 	def __init__(self, username:str, auth:str):
-		self.auth, self.profileID = auth, makeRubinoData(auth, "isExistUsername", {"username": username.replace('@', '')})["data"]["profile"]["id"]
-		welcome(f"rubika library version {__version__}\n{__copyright__}\n➜ docs : https://rubikalib.github.io\n\nswitching rubino...")
+		self.auth, self.profileID = auth, makeRubinoData(auth, "isExistUsername", {"username": username})["data"]["profile"]["id"]
+		welcome(f"rubika library version {__version__}\n{__copyright__}\n→ docs : https://rubikalib.github.io\n\nswitching rubino...")
 
 	addPost           = lambda self, caption, fileID, hashFile, thumbnailID, thumbnailHash, width, height, post_type="Picture", is_multi_file=False: makeRubinoData(self.auth, "addPost", {"caption": caption, "file_id": fileID, "hash_file_receive": hashFile, "height": str(height), "width": str(width), "is_multi_file": is_multi_file, "post_type": post_type, "rnd": randint(100000, 999999999), "thumbnail_file_id": thumbnailID, "thumbnail_hash_file_receive": thumbnailHash, "profile_id": self.profileID})
 	addStory          = lambda self, duration, hashFile, fileID, storyType, thumbnailID, thumbnailHash, width, height: makeRubinoData(self.auth, "addStory", {"duration": duration, "file_id": fileID, "hash_file_receive": hashFile, "height": height, "profile_id": self.profileID, "rnd": randint(100000, 999999999), "story_type": storyType, "thumbnail_file_id": thumbnailID, "thumbnail_hash_file_receive": thumbnailHash, "width": width})

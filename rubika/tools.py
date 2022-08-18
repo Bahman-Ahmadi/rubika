@@ -92,7 +92,7 @@ class Tools:
 			Thread(target=get).start()
 			Thread(target=use).start()
 
-	loadTime = lambda timestamp, func=__import__("jdatetime").datetime.fromtimestamp: func(int(timestamp))
+	loadTime = lambda timestamp, func=__import__("datetime").datetime.fromtimestamp: func(int(timestamp)) # func can be __import__("jdatetime").datetime.fromtimestamp THEN you must install jdatetime using `pip install jdatetime`
 
 	@staticmethod
 	def parse(mode, text):

@@ -1,3 +1,4 @@
+from os         import path
 from threading  import Thread
 from datetime   import datetime
 from sys        import exc_info
@@ -11,40 +12,26 @@ from rubika.tools      import Tools
 from rubika.encryption import encryption
 from rubika.configs    import makeData, makeTmpData, defaultDevice, _getURL, welcome, __version__, __license__, __copyright__
 
-shownWelcome  = False
-if not shownWelcome: welcome(f"rubika library version {__version__}\n{__copyright__}\n→ docs : https://rubikalib.github.io\n")
+welcome(f"rubika library version {__version__}\n{__copyright__}\n→ docs : https://rubikalib.github.io\n")
 
 class Bot:
-	downloadURL = "https://messengerX.iranlms.ir/GetFile.ashx"
-	DCsURL      = "https://messengerg2cX.iranlms.ir/"
-	getDCsURL   = "https://getdcmess.iranlms.ir"
-	wsURL       = "wss://msocket1.iranlms.ir:80"
+	downloadURL, DCsURL, getDCsURL, wsURL = "https://messengerX.iranlms.ir/GetFile.ashx", "https://messengerg2cX.iranlms.ir/", "https://getdcmess.iranlms.ir", "wss://msocket1.iranlms.ir:80"
 
 	def __init__(self, appName:str, auth:str=None, phoneNumber:str=None, wantRegister:bool=True, device:dict=defaultDevice, appType="rubika"):
-		welcome(f"executing codes on the {appType}...")
-		self.appName, self.appType, shownWelcome = appName, appType.lower(), True
+		self.appName, self.appType = appName, appType.lower()
 		if self.appType.lower() == "shad": Bot.setAsShad(self)
 
 		if auth is not None and len(auth) == 32 : self.auth = auth
-		elif phoneNumber is not None and len(phoneNumber) == 11 :
-			code    = Bot.sendCode(phoneNumber)["data"]["phone_code_hash"]
-			account = Bot.signIn(phoneNumber, code, input("please enter activation code : "))
-			open(f"{self.appName}.json", "w").write(dumps(account, indent=4, ensure_ascii=True))
-			self.auth = account["data"]["auth"]
-			if wantRegister : Bot.registerDevice(self.auth, device=device)
 		else :
-			try:
-				account = loads(open(f"{appName}.json").read())
-				self.auth = account["data"]["auth"]
-			except FileNotFoundError:
-				phoneNumber = input("please enter your phone number (e.g. 09123456789) : ")
-				code        = Bot.sendCode(phoneNumber)["data"]["phone_code_hash"]
-				account     = Bot.signIn(phoneNumber, code, input("please enter activation code : "))
-				open(f"{appName}.json", "w").write(dumps(account, indent=4, ensure_ascii=True))
-				self.auth = account["data"]["auth"]
-				if wantRegister : Bot.registerDevice(self.auth, device=device)
+			fileExist   = path.exists(f"{self.appName}.json")
+			phoneNumber = phoneNumber if not fileExist and phoneNumber is not None and len(phoneNumber) == 11 else input("please enter your phone number (e.g. 09123456789) : ")
+			account     = loads(open(f"{self.appName}.json").read()) if fileExist else Bot.signIn(phoneNumber, Bot.sendCode(phoneNumber)["data"]["phone_code_hash"], input("please enter activation code : "))
+			self.auth   = account["data"]["auth"]
+			if not fileExist and wantRegister :
+				Bot.registerDevice(self.auth, device=device)
+				open(f"{self.appName}.json", "w").write(dumps(account, indent=4, ensure_ascii=True))
 
-		self.enc = encryption(self.auth)
+		self.enc  = encryption(self.auth)
 
 	_getURL    = lambda dc_id=None: _getURL(Bot.DCsURL, Bot.getDCsURL, dc_id)
 	addContact = lambda self, first_name, last_name, phone: Bot._create(4, self.auth, "addAddressBook", {"first_name": first_name, "last_name": last_name, "phone": phone})
@@ -83,15 +70,12 @@ class Bot:
 		folder_id: (str) id of the target folder
 		name: (str) name of the target folder
 		'''
-		kwargs["update_parameters"] = []
-		for i in kwargs.keys():
-			if "clude" in i: kwargs["update_parameters"].append(i)
+		kwargs["update_parameters"] = [i for i in kwargs.keys() if "clude" in i]
 		return Bot._create(5, self.auth, "editFolder", kwargs, clients.android)
 	editVoiceChat = lambda self, chat_id, voice_chat_id, title: Bot._create(5, self.auth, f"set{Bot._chatDetection(chat_id)}VoiceChatSetting", {f"{Bot._chatDetection(chat_id).lower()}_guid":chat_id, "voice_chat_id" : voice_chat_id, "title" : title, "updated_parameters": ["title"]})
 	def editChatInfo(self, chat_id, **kwargs):
 		chat = Bot._chatDetection(chat_id)
-		data = {f"{chat.lower()}_guid": chat_id, }
-		result:list = []
+		data, result = {f"{chat.lower()}_guid": chat_id}, []
 		if "username" in list(kwargs.keys()):
 			result.append(Bot._create(4, self.auth, "updateChannelUsername", {"channel_guid": chat_id, "username": kwargs.get("username").replace("@", ""), "updated_parameters":["username"]}))
 			kwargs.pop("username")
@@ -254,16 +238,12 @@ class Bot:
 	votePoll     = lambda self, poll_id, option_index: Bot._create(4, self.auth, "votePoll", {"poll_id": poll_id,"selection_index": option_index})
 
 class Socket:
-	appliedFilters, filtersType, func = [], "all", lambda msg: ...
+	appliedFilters, chats, noChats, filtersType, func = *[[]]*3, "all", lambda msg: ...
 
-	def __init__(self, auth, proxy:str=None, logging:bool=False):
-		self.auth, self.enc, self.proxy, self.logging = auth, encryption(auth), proxy, logging
+	def __init__(self, auth, proxy:str=None, logging:bool=False): self.auth, self.enc, self.proxy, self.logging = auth, encryption(auth), proxy, logging
 
 	def on_open(self, ws):
-		welcome("connecting socket...")
-		shownWelcome = True
-		handShake = lambda *args: ws.send(dumps({"api_version": "4","auth": self.auth,"data_enc": "","method": "handShake"}))
-		Thread(target=handShake, args=()).start()
+		Thread(target=ws.send(dumps({"api_version": "4","auth": self.auth,"data_enc": "","method": "handShake"})), args=()).start()
 
 	on_error = lambda self, ws, error:     print(error) if self.logging else None
 	on_close = lambda self, ws, code, msg: print({"code": code, "message": msg}) if self.logging else None
@@ -273,22 +253,22 @@ class Socket:
 	def on_message(self, ws, message):
 		try:
 			from rubika.Types import Message
-			bot = Bot("", self.auth)
-			update, conditions = loads(self.enc.decrypt(loads(message)["data_enc"])), []
+			bot, update, conditions = Bot("", self.auth), loads(self.enc.decrypt(loads(message)["data_enc"])), []
+			if self.logging: print(update)
 			parsedMessage = Message(self.auth, update["message_updates"][-1], chat_id=update["message_updates"][-1]["object_guid"], bot=bot)
 			[conditions.append(condition(bot, update)) for condition in Socket.appliedFilters]
-			if   Socket.filtersType == "any" and any(conditions):        Thread(target=Socket.func, args=(parsedMessage,)).start()
-			elif Socket.filtersType == "invert" and not all(conditions): Thread(target=Socket.func, args=(parsedMessage,)).start()
-			elif all(conditions):                                        Thread(target=Socket.func, args=(parsedMessage,)).start()
-		except Exception as e:
-			if self.logging: print("\n✘ ERROR at line : ", exc_info()[2].tb_lineno, "\n    ",e)
+			if (Socket.chats == [] or (Socket.chats != [] and parsedMessage.chat_id in Socket.chats)) and (Socket.noChats == [] or (Socket.noChats != [] and not parsedMessage.chat_id in Socket.noChats)):
+				if   Socket.filtersType == "any" and any(conditions):        Thread(target=Socket.func, args=(parsedMessage,)).start()
+				elif Socket.filtersType == "invert" and not all(conditions): Thread(target=Socket.func, args=(parsedMessage,)).start()
+				elif all(conditions):                                        Thread(target=Socket.func, args=(parsedMessage,)).start()
+		except IndexError: pass
+		except Exception as e: print("\n✘ ERROR at line : ", exc_info()[2].tb_lineno, "\n    ",e) if self.logging else None
 
 	def handler(self, *args, **kwargs):
 		def wrapper(func):
-			import websocket # pip install websocket-client
+			import websocket
 
-			Socket.func, Socket.appliedFilters = func, args
-			Socket.filtersType:types = kwargs.get("Type") or types.ALL
+			Socket.func, Socket.appliedFilters, Socket.filtersType, Socket.chats, Socket.noChats = func, args, kwargs.get("Type") or types.ALL, kwargs.get("chats") or [], kwargs.get("blacklist")
 			try: Bot.wsURL = choice(list(GET(Bot.getDCsURL).json()["data"]["socket"].values()))
 			except exceptions.ConnectionError: ...
 			ws = websocket.WebSocketApp(Bot.wsURL, on_open = Socket(self.auth).on_open, on_message = Socket(self.auth).on_message, on_error = Socket(self.auth).on_error, on_close = Socket(self.auth).on_close, on_ping = Socket(self.auth).on_ping, on_pong = Socket(self.auth).on_pong)
