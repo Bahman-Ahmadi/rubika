@@ -37,6 +37,9 @@ class Message:
 	def forward(self, to:str) -> dict:
 		return self.bot.forwardMessages(self.chat_id, [str(self.data.message_id)], to)
 
+	def resend(self, to:str, **kwargs) -> dict:
+		return self.bot.resendMessage(self.chat_id, self.data.message_id, to, **kwargs)
+
 	def getInfo(self) -> dict:
 		return self.bot.getMessagesInfo(self.chat_id, [str(self.data.message_id)])[0]
 

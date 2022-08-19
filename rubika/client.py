@@ -24,7 +24,7 @@ class Bot:
 		if auth is not None and len(auth) == 32 : self.auth = auth
 		else :
 			fileExist   = path.exists(f"{self.appName}.json")
-			phoneNumber = phoneNumber if not fileExist and phoneNumber is not None and len(phoneNumber) == 11 else input("please enter your phone number (e.g. 09123456789) : ")
+			phoneNumber = phoneNumber if fileExist and phoneNumber is not None and len(phoneNumber) == 11 else input("please enter your phone number (e.g. 09123456789) : ")
 			account     = loads(open(f"{self.appName}.json").read()) if fileExist else Bot.signIn(phoneNumber, Bot.sendCode(phoneNumber)["data"]["phone_code_hash"], input("please enter activation code : "))
 			self.auth   = account["data"]["auth"]
 			if not fileExist and wantRegister :
@@ -113,7 +113,7 @@ class Bot:
 	getAvatars                 = lambda self, chat_id: Bot._create(5, self.auth, "getAvatars", {"object_guid": chat_id})
 	getPollStatus              = lambda self, poll_id: Bot._create(5, self.auth, "getPollStatus", {"poll_id":str(poll_id)})
 	getPollOptionVoters        = lambda self, poll_id, option_index, start_id=None: Bot._create(5, self.auth, "getPollOptionVoters", {"poll_id":poll_id,"selection_index": option_index,"start_id": start_id})
-	getPostByLink              = lambda self, link:    Bot._create(5, self.auth, "getLinkFromAppUrl", {"app_link": link})["data"]["chat"]["open_chat_data"]
+	getPostByLink              = lambda self, link:    Bot._create(5, self.auth, "getLinkFromAppUrl", {"app_url": link})["data"]["link"]["open_chat_data"]
 	getUserCommonGroups        = lambda self, chat_id: Bot._create(4, self.auth, "getCommonGroups", {"user_guid": chat_id})
 	getGroupOnlineMembersCount = lambda self, chat_id: Bot._create(4, self.auth, "getGroupOnlineCount", {"group_guid": chat_id}).get("online_count")
 	getTwoPasscodeStatus       = lambda self:          Bot._create(4, self.auth, "getTwoPasscodeStatus", {})
@@ -147,6 +147,10 @@ class Bot:
 	reportChat      = lambda self, chat_id, reportType=106, description=None: Bot._create(4, self.auth, "reportObject", {"object_guid": chat_id, "report_description": description, "report_type": reportType, "report_type_object": "Object"})
 	removeChat      = lambda self, chat_id: Bot._create(4, self.auth, f"remove{Bot._chatDetection(chat_id)}", {f"{Bot._chatDetection(chat_id).lower()}_guid": chat_id})
 	requestSendFile = lambda self, file, size=None: requestSendFile(self, file, int(size))
+	def resendMessage(self, From, message_id, To, **kwargs):
+		message = Bot.getMessagesInfo(self, From, [str(message_id)])[0]
+		for key,value in kwargs.items(): message[key] = value
+		return Bot._create(5, self.auth, "sendMessage", dict(object_guid=To, rnd=str(randint(100000,999999999)), **message))
 
 	sendCode = lambda phoneNumber: Bot._createTMP("sendCode", {"phone_number":f"98{phoneNumber[1:]}", "send_type":"SMS"})
 	signIn   = lambda phoneNumber, phone_code_hash, phone_code: Bot._createTMP("signIn", { "phone_number": f"98{phoneNumber[1:]}", "phone_code_hash": phone_code_hash, "phone_code": phone_code })
