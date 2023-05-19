@@ -4,7 +4,7 @@ from sys import argv
 from setuptools import setup, find_packages
 
 requires = ["requests", "pycryptodome==3.10.1", "urllib3", "tqdm", "aiohttp", "rich", "websocket-client"]
-version = "6.0.6"
+version = "6.0.7"
 readme = """
 <p align="center">
     <a href="https://github.com/bahman-ahmadi/rubika">
