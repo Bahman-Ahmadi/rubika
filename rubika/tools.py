@@ -10,7 +10,7 @@ unlockTime = None
 
 class Tools:
     def __init__(self, auth):
-        from client import Bot, Socket
+        from rubika.client import Bot, Socket
         bot = Bot("", auth=auth)
         socket = Socket(auth)
 

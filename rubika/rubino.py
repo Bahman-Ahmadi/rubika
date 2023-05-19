@@ -1,8 +1,8 @@
 from pathlib import Path
 from random  import randint
 
-from fileIO import uploadFile
-from configs import makeRubinoData, welcome, __version__, __license__, __copyright__
+from rubika.fileIO import uploadFile
+from rubika.configs import makeRubinoData, welcome, __version__, __license__, __copyright__
 
 class Rubino:
     def __init__(self, auth:str):

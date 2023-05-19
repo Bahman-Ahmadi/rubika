@@ -5,10 +5,10 @@ from datetime import datetime
 from aiohttp  import ClientSession, client_exceptions
 from string   import ascii_lowercase, ascii_uppercase, digits
 
-from encryption import encryption
-from exceptions import *
+from rubika.encryption import encryption
+from rubika.exceptions import *
 
-__version__ , __license__ , __copyright__ = "6.0.6" , "GPLv3 license" , f"Copyright (C) {datetime.now().year} Bahman Ahmadi <github.com/Bahman-Ahmadi>"
+__version__ , __license__ , __copyright__ = "6.0.5" , "GPLv3 license" , f"Copyright (C) {datetime.now().year} Bahman Ahmadi <github.com/Bahman-Ahmadi>"
 
 class accesses:
     class admin:

@@ -1,18 +1,17 @@
 Metadata-Version: 2.1
 Name: rubika
-Version: 6.0.5
+Version: 6.0.6
 Summary: this is an unofficial library for making bots in rubika. using this library you can make your own rubika bot and control that
 Home-page: https://github.com/bahman-ahmadi/rubika
+Download-URL: https://github.com/bahman-ahmadi/rubika/releases/latest
 Author: Bahman Ahmadi
 Author-email: bahmanahmadi.mail@gmail.com
 License: LGPLv3
-Download-URL: https://github.com/bahman-ahmadi/rubika/releases/latest
 Project-URL: Tracker, https://github.com/bahman-ahmadi/rubika/issues
 Project-URL: Community, https://t.me/rubikalib
 Project-URL: Source, https://github.com/bahman-ahmadi/rubika
 Project-URL: Documentation, https://rubikalib.github.io
 Keywords: rubika self bot api library python
-Platform: UNKNOWN
 Classifier: Development Status :: 5 - Production/Stable
 Classifier: Intended Audience :: Developers
 Classifier: Natural Language :: English
@@ -118,6 +117,4 @@ rubika library is licensed under [GPLv3 license](https://github.com/bahman-ahmad
 
 This is not an official rubika product. It is not affiliated with nor endorsed by rubika Inc.
 
-© 2022 Bahman Ahmadi
-
-
+© 2023 Bahman Ahmadi

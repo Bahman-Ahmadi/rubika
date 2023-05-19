@@ -6,11 +6,11 @@ from json       import loads, dumps
 from random     import randint, choice
 from requests   import get as GET, exceptions
 
-from fileIO     import *
-from filters    import *
-from tools      import Tools
-from encryption import encryption
-from configs    import makeData, makeTmpData, defaultDevice, _getURL, welcome, __version__, __license__, __copyright__
+from rubika.fileIO     import *
+from rubika.filters    import *
+from rubika.tools      import Tools
+from rubika.encryption import encryption
+from rubika.configs    import makeData, makeTmpData, defaultDevice, _getURL, welcome, __version__, __license__, __copyright__
 
 welcome(f"rubika library version {__version__}\n{__copyright__}\n→ docs : https://rubikalib.github.io\n")
 

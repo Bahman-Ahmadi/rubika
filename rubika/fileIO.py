@@ -2,7 +2,7 @@ from pathlib import Path
 from requests import get, post
 from sys import exc_info
 
-from configs import clients, makeData, _getURL
+from rubika.configs import clients, makeData, _getURL
 
 def requestSendFile(bot, file:str, size:int=None) -> dict:
 	return makeData(4, bot.auth, "requestSendFile", {"file_name": file.split("/")[-1], "mime": file.split(".")[-1], "size": str(size or Path(file).stat().st_size)}, clients.android, url=_getURL(DCsURL=bot.DCsURL , getDCsURL=bot.getDCsURL , dc_id=None))
