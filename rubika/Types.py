@@ -1,6 +1,6 @@
-from rubika.exceptions import InvalidInput
-from rubika.configs import makeData
-from rubika.tools import Tools
+from exceptions import InvalidInput
+from configs import makeData
+from tools import Tools
 
 class DictToClass:
 	def __init__(self, message):
@@ -23,7 +23,7 @@ class Message:
 
 		if type(message) != dict:
 			try:
-				from rubika.client import Bot
+				from client import Bot
 				self.bot = self.bot or Bot("", self.auth)
 				message = self.bot.getMessagesInfo(self.chat_id, [str(message)])[0]
 			except IndexError:

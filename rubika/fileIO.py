@@ -2,20 +2,20 @@ from pathlib import Path
 from requests import get, post
 from sys import exc_info
 
-from rubika.configs import clients, makeData
+from configs import clients, makeData, _getURL
 
 def requestSendFile(bot, file:str, size:int=None) -> dict:
-	return makeData(4, bot.auth, "requestSendFile", {"file_name": file.split("/")[-1], "mime": file.split(".")[-1], "size": str(size or Path(file).stat().st_size)}, clients.android)
+	return makeData(4, bot.auth, "requestSendFile", {"file_name": file.split("/")[-1], "mime": file.split(".")[-1], "size": str(size or Path(file).stat().st_size)}, clients.android, url=_getURL(DCsURL=bot.DCsURL , getDCsURL=bot.getDCsURL , dc_id=None))
 
-def uploadFile(bot, file, frequest:dict=None, logging:bool=False):
+def uploadFile(bot, file, frequest:dict=None, logging:bool=False, rubino:bool=False, rubinoFRequest:callable=None, rubinoFType:str="Picture"):
 	bytef:bytes    = open(file,"rb").read() if not "http" in file else get(file).content
-	frequest:dict  = frequest or requestSendFile(bot, file, size=len(bytef))
-	hash_send, file_id, url, size = frequest["access_hash_send"], frequest["id"], frequest["upload_url"], len(bytef)
-	header   = {'auth': bot.auth, 'Host': url.replace("https://","").replace("/UploadFile.ashx",""), 'chunk-size': str(size), "part-number": "1", "total-part": "1", 'file-id': str(file_id), 'access-hash-send': hash_send, "content-type": "application/octet-stream", "content-length": str(size), "accept-encoding": "gzip", "user-agent": "okhttp/3.12.1"}
+	frequest:dict  = frequest or rubinoFRequest(file, size=len(bytef), Type=rubinoFType) if rubino else requestSendFile(bot, file, size=len(bytef))
+	hash_send, file_id, url, size = frequest["hash_file_request" if rubino else "access_hash_send"], frequest["file_id" if rubino else "id"], frequest["server_url" if rubino else "upload_url"], len(bytef)
+	header   = {'auth': bot.auth, 'Host': url.replace("https://","").replace("/UploadFile.ashx",""), 'chunk-size': str(size), "part-number": "1", "total-part": "1", 'file-id': str(file_id), 'hash-file-request' if rubino else 'access-hash-send': hash_send, "content-type": "application/octet-stream", "content-length": str(size), "accept-encoding": "gzip", "user-agent": "okhttp/3.12.1"}
 
 	if size <= 131072:
 		while True:
-			try: return [frequest, post(data=bytef,url=url,headers=header).json()['data']['access_hash_rec']]
+			try: return [frequest, post(data=bytef,url=url,headers=header).json()['data']['hash_file_receive' if rubino else 'access_hash_rec']]
 			except Exception as e:
 				if logging: print(e)
 	else:
@@ -29,7 +29,7 @@ def uploadFile(bot, file, frequest:dict=None, logging:bool=False):
 					break
 				except Exception as e:
 					if logging: print(e)
-			if i == t: return [frequest, response['data']['access_hash_rec']]
+			if i == t: return [frequest, response['data']['hash_file_receive' if rubino else 'access_hash_rec']]
 
 def uploadFileStepByStep(bot, file, frequest, logging:bool=True):
 	bytef:bytes    = open(file,"rb").read() if not "http" in file else get(file).content

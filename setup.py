@@ -4,7 +4,7 @@ from sys import argv
 from setuptools import setup, find_packages
 
 requires = ["requests", "pycryptodome==3.10.1", "urllib3", "tqdm", "aiohttp", "rich", "websocket-client"]
-version = "6.0.5"
+version = "6.0.6"
 readme = """
 <p align="center">
     <a href="https://github.com/bahman-ahmadi/rubika">
@@ -83,7 +83,7 @@ rubika library is licensed under [GPLv3 license](https://github.com/bahman-ahmad
 
 This is not an official rubika product. It is not affiliated with nor endorsed by rubika Inc.
 
-© 2022 Bahman Ahmadi
+© 2023 Bahman Ahmadi
 """
 
 setup(
