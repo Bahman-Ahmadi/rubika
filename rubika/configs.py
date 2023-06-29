@@ -136,7 +136,6 @@ def makeData(auth:str, enc:encryption, method:str, data:dict, client:dict=client
             "client": client
         }
     }
-    print(outerJson)
     outerJson["data_enc"] = enc.encrypt(dumps(outerJson["data_enc"]))
     outerJson["sign"] = enc.makeSignFromData(outerJson["data_enc"])
     return POST(outerJson, url=url, platform=client.get('package'), method=method, enc=enc)

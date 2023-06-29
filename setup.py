@@ -1,13 +1,13 @@
 import re
 from sys import argv
-from requests import get
+# from requests import get
 from setuptools import setup, find_packages
 
 requires = ["requests", "pycryptodome==3.10.1", "urllib3",
             "tqdm", "aiohttp", "rich", "websocket-client", "schedule"]
-version = "6.6.9"
-readme = get(
-    "https://raw.githubusercontent.com/Bahman-Ahmadi/rubika/main/README.md").text
+version = "6.6.10"
+# get("https://raw.githubusercontent.com/Bahman-Ahmadi/rubika/main/README.md").text
+readme = "read the docs from https://github.com/Bahman-Ahmadi/rubika"
 
 setup(
     name="rubika",
