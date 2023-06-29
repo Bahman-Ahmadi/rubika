@@ -30,7 +30,7 @@ class Message:
 
         if type(message) != dict:
             try:
-                from rubika.client import Bot
+                from rubika import Bot
                 self.bot = self.bot or Bot("", self.auth)
                 message = self.bot.getMessagesInfo(
                     self.chat_id, [str(message)])[0]

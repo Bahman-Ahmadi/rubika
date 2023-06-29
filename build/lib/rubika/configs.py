@@ -1,4 +1,4 @@
-from re import findall
+from asyncio import run
 from datetime import datetime
 from requests import get, post
 from random import sample, choice
@@ -39,12 +39,12 @@ class clients:
         "lang_code": "fa"
     }
     web = {
-		"app_name": "Main",
-		"app_version": "4.3.3",
-		"platform": "Web",
-		"package": "web.rubika.ir",
-		"lang_code": "fa"
-	}
+        "app_name": "Main",
+        "app_version": "4.0.7",
+        "platform": "Web",
+        "package": "web.ir",
+        "lang_code": "fa"
+    }
     android = {
         "app_name": "Main",
         "app_version": "2.9.8",
@@ -73,30 +73,24 @@ class visibility:
 randStr = lambda length, choices=[*ascii_lowercase, *ascii_uppercase,
                                   *digits, *"-_"]: "".join([choice(choices) for i in range(length)])
 
-defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/113.0"
-
 defaultDevice = {
-	"token_type": "Web",
-	"token": "",
-	"app_version": "WB_4.3.3",
-	"lang_code": "fa",
-	"system_version": "Windows 10",
-	"device_model": "Firefox 113",
-	"device_hash" : "2"+''.join(findall(r'\d+', defaultUserAgent))
+    "app_version": "MA_2.9.8",
+    "device_hash": randStr(32, [*ascii_uppercase, *digits]),
+    "device_model": "rubikalib",
+    "is_multi_account": False,
+    "lang_code": "fa",
+    "system_version": "SDK 22",
+    "token": f"{randStr(22, [*ascii_lowercase, *ascii_uppercase, *digits])}:{randStr(140)}",
+    "token_type": "Firebase"
 }
+
 
 def POST(json: dict, method, url: str = None, platform="web.rubika.ir", enc: encryption = None, isEncrypted: bool = True) -> dict:
     while 1:
         try:
-            response = post(url=url, json=json, headers={
-                    'Origin': 'https://'+platform,
-					'Referer': f'https://{platform}/',
-					'Host': url.replace("https://","").replace("/",""),
-					'User-Agent': defaultUserAgent
-            }).text
+            response = requests.post(url=url, json=json, headers={"referer": platform}).text()
             response = loads(str(enc.decrypt(loads(response).get("data_enc")))) if "data_enc" in loads(response).keys() and isEncrypted else loads(response)
             if "status" in response.keys() and response.get("status") != "OK":
-                print(json, method, url, platform, response)
                 if response.get("status_det") == "NOT_REGISTERED":
                     raise NotRegistered("the auth is incorrect. please sure about your account's health then login again.")
                 elif response.get("status_det") == "INVALID_INPUT":
@@ -105,8 +99,8 @@ def POST(json: dict, method, url: str = None, platform="web.rubika.ir", enc: enc
                     raise TooRequests(f"the {platform}/{method} method has been limited. please try again later.")
                 elif response.get("status_det") == 'INVALID_AUTH':
                     raise InvalidAuth(f"the inserted argument(s) in {platform}/{method} is vaild but is not related to other argument(s) or maybe for other reasons, anyway now this method can't run on server. please don't enter fake argument(s) and fix anything can return this exception")
-            else:
-                return response
+                else:
+                    return response
         except decoder.JSONDecodeError:
                 ...
         except ConnectionError:
@@ -126,26 +120,25 @@ def _getURL(key="default_api_urls", DCsURL: str = "https://messengerg2cX.iranlms
                 break
 
 
-def makeData(auth:str, enc:encryption, method:str, data:dict, client:dict=clients.web, url:str = None) -> dict:
-    url = url or _getURL()
+def makeData(auth:str, method:str, data:dict, client:dict, url:str = None) -> dict:
+    url, enc = url or _getURL(), encryption(auth)
     outerJson = {
         "api_version": "6",
         "auth": auth,
-        "data_enc": {
+        "data_enc": enc.encrypt(dumps({
             "method": method,
             "input": data,
             "client": client
-        }
+        }))
     }
-    print(outerJson)
-    outerJson["data_enc"] = enc.encrypt(dumps(outerJson["data_enc"]))
     outerJson["sign"] = enc.makeSignFromData(outerJson["data_enc"])
+
     return POST(outerJson, url=url, platform=client.get('package'), method=method, enc=enc)
 
 
 def makeTmpData(method: str, data: dict, url: str = None, tmp:str=None) -> dict:
-    url, tmp = url or _getURL(), encryption.changeAuthType(tmp or tmpGeneration())
-    enc = encryption(tmp)
+    url, tmp = url or _getURL(), tmp or tmpGeneration()
+    enc = encryption(encryption.changeAuthType(tmp))
     outerJson = {
         "api_version": "6",
         "tmp_session": tmp,
@@ -156,7 +149,7 @@ def makeTmpData(method: str, data: dict, url: str = None, tmp:str=None) -> dict:
         }))
     }
 
-    resp = POST(outerJson, method, url=url, platform=clients.web.get("package"), enc=enc)
+    resp = POST(outerJson, method, url=url, platform=clients.web.get("package"), enc=enc).json()
     resp['tmp'] = tmp
     return resp
 
@@ -169,7 +162,7 @@ def makeRubinoData(auth: str, method: str, data: dict) -> dict:
         "data": data,
         "method": method
     }
-    return POST(outerJson, method, url="https://rubino12.iranlms.ir/", platform=clients.web.get('package'), isEncrypted=False)
+    return POST(outerJson, method, url="https://rubino12.iranlms.ir/", platform="rubino", isEncrypted=False)
 
 
 def tmpGeneration():

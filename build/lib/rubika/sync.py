@@ -33,9 +33,7 @@ class Bot:
             fileName = f"{self.appName}.json"
             fileExists = path.exists(fileName)
             if fileExists:
-                self.auth = loads(open(fileName).read())["auth"]
-                privateKey = loads(open(fileName).read())["private"]
-                b64decodePrivate = False
+                self.auth = loads(open(fileName).read())["data"]["auth"]
             else:
                 phoneNumber = input(">>> Enter the Phone number (e.g. 09123456789): ")
                 sendCodeResp = Bot.sendCode(phoneNumber)
@@ -56,19 +54,18 @@ class Bot:
                         otp = input(">>> Re-Enter activation code: ")
                         account = Bot.signIn(tmp, phoneNumber, codeHash, otp)
                 
-                    self.auth = account['auth']
-                    Bot.privateKey = privateKey = account['private']
+                    self.auth, privateKey = account['auth'], account['private']
                     open(f"{self.appName}.json", "w").write(dumps(account, indent=4, ensure_ascii=True))
-                    
-                    if wantRegister:
-                        Bot.registerDevice(self.auth, device=device)
         
         # No matter that login is manually or automatically, this block will run anyway
         if b64decodePrivate:
             privateKey = loads(b64decode(privateKey).decode('utf-8'))['d']
-     
-        Bot.privateKey = self.privateKey = privateKey
-        Bot.enc = self.enc = self.enc(self.enc.changeAuthType(self.auth), private_key=privateKey)
+        
+        self.auth = self.enc.changeAuthType(auth)
+        self.enc = self.enc(self.auth, privateKey)
+
+        if wantRegister:
+            Bot.registerDevice(self.auth, device=device)
 
     def __enter__(self): return self
     def __exit__(self, exc_type, exc_value, exc_tb): return self
@@ -85,7 +82,7 @@ class Bot:
         return Bot._create(self.auth, "addChannel", {"channel_type": channelType, "title": title, "member_guids": users_chat_id or []})
 
     def addFolder(self, name, exclude_chat_types=[], exclude_object_guids=[], include_chat_types=[], include_object_guids=[], is_add_to_top=True, folder_id=""):
-        return Bot._create(self.auth, "addFolder", dict(exclude_object_guids=exclude_object_guids, include_object_guids=include_object_guids, exclude_chat_types=exclude_chat_types, include_chat_types=include_chat_types, folder_id=folder_id, is_add_to_top=is_add_to_top, name=name))
+        return Bot._create(self.auth, "addFolder", dict(exclude_object_guids=exclude_object_guids, include_object_guids=include_object_guids, exclude_chat_types=exclude_chat_types, include_chat_types=include_chat_types, folder_id=folder_id, is_add_to_top=is_add_to_top, name=name), clients.android)
 
 
     def banMember(self, chat_id, member_id):
@@ -96,9 +93,8 @@ class Bot:
 
 
     @staticmethod
-    def _create(auth, method, data, client=clients.web):
-        print(auth, Bot.privateKey)
-        return makeData(auth, encryption(encryption.changeAuthType(auth), private_key=Bot.privateKey), method, dict(data))
+    def _create(auth, method, data, client=clients.android):
+        return makeData(auth, method, dict(data), client, url=_getURL(DCsURL=Bot.DCsURL, getDCsURL=Bot.getDCsURL, dc_id=None))
 
     @staticmethod
     def _createTMP(method, data, tmp=None):
@@ -134,7 +130,7 @@ class Bot:
         return Bot._create(self.auth, "deleteChatHistory", {"object_guid": chat_id, "last_message_id": lastMessageId})
 
     def deleteFolder(self, folder_id):
-        return Bot._create(self.auth, "deleteFolder", dict(folder_id=folder_id))
+        return Bot._create(self.auth, "deleteFolder", dict(folder_id=folder_id), clients.android)
 
     def deleteUserChat(self, chat_id, lastMessageID):
         return Bot._create(self.auth, "deleteUserChat", {"last_deleted_message_id": lastMessageID, "user_guid": chat_id})
@@ -160,7 +156,7 @@ class Bot:
         name: (str) name of the target folder
         '''
         kwargs["update_parameters"] = [i for i in kwargs.keys() if "clude" in i]
-        return Bot._create(self.auth, "editFolder", kwargs)
+        return Bot._create(self.auth, "editFolder", kwargs, clients.android)
 
     def editVoiceChat(self, chat_id, voice_chat_id, title):
         return Bot._create(self.auth, f"set{Bot._chatDetection(chat_id)}VoiceChatSetting", {f"{Bot._chatDetection(chat_id).lower()}_guid": chat_id, "voice_chat_id": voice_chat_id, "title": title, "updated_parameters": ["title"]})
@@ -238,7 +234,7 @@ class Bot:
         return Bot._create(self.auth, f"get{Bot._chatDetection(chat_id)}AllMembers", {f"{Bot._chatDetection(chat_id).lower()}_guid": chat_id, "search_text": search_text, "start_id": start_id})
 
     def getInfo(self, chat_id=None):
-        return Bot._create(self.auth, f"get{'User' if chat_id is None else Bot._chatDetection(chat_id)}Info", {} if chat_id is None else {f"{Bot._chatDetection(chat_id).lower()}_guid": chat_id}).get("data")
+        return Bot._create(self.auth, f"get{Bot._chatDetection(chat_id)}Info", {} if chat_id is None else {f"{Bot._chatDetection(chat_id).lower()}_guid": chat_id}).get("data")
 
     def getLink(self, chat_id):
         return Bot._create(self.auth, f"get{Bot._chatDetection(chat_id)}Link", {f"{Bot._chatDetection(chat_id).lower()}_guid": chat_id}).get("data").get("join_link")
@@ -292,10 +288,10 @@ class Bot:
         return Bot._create(self.auth, "getNotificationSetting", {}).get("notification_setting")
 
     def getSuggestedFolders(self):
-        return Bot._create(self.auth, "getSuggestedFolders", {})
+        return Bot._create(self.auth, "getSuggestedFolders", {}, clients.android)
 
     def getFolders(self):
-        return Bot._create(self.auth, "getFolders", {}).get("folders")
+        return Bot._create(self.auth, "getFolders", {}, clients.android).get("folders")
 
     def getOwning(self, chat_id):
         return Bot._create(self.auth, "getPendingObjectOwner", {"object_guid": chat_id})
@@ -367,7 +363,7 @@ class Bot:
         public, private = encryption.rsaKeyGenerate()
         resp = Bot._createTMP("signIn", {"phone_number": f"98{phoneNumber[1:]}", "phone_code_hash": phone_code_hash, "phone_code": phone_code, "public_key": public}, tmp=tmp)
         if resp['status'] == "OK" and resp['data']['status'] == "OK":
-            resp['auth'] = encryption.decryptRsaOaep(private, resp['data']['auth'])
+            resp['auth'] = encryption.decryptRsaOaep(private,request['data']['auth'])
             resp['private'] = private
         return resp
 
@@ -522,14 +518,21 @@ class Socket:
     appliedFilters, chats, noChats, filtersType, func = * \
         [[]]*3, "all", lambda msg: ...
 
-    def __init__(self, auth, privateKey, proxy: str = None, logging: bool = False):
-        self.auth, self.privateKey, self.enc, self.proxy, self.logging = auth, privateKey, oldEncryption(auth), proxy, logging
+    def __init__(self, auth, proxy: str = None, logging: bool = False):
+        self.auth, self.enc, self.proxy, self.logging = auth, encryption(
+            auth), proxy, logging
 
     def __enter__(self): return self
     def __exit__(self, exc_type, exc_value, exc_tb): return self
 
     def on_open(self, ws):
-        ws.send({"api_version": "5", "auth": self.auth, "data_enc": "", "method": "handShake"})
+        def handShake(ws, sleep=30):
+            import time
+            ws.send(dumps({"api_version": "4", "auth": self.auth,
+                    "data_enc": "", "method": "handShake"}))
+            time.sleep(sleep)
+            handShake(ws)
+        Thread(target=handShake, args=(ws,)).start()
 
     def on_error(self, ws, error):
         print(error) if self.logging else None
@@ -546,7 +549,8 @@ class Socket:
     def on_message(self, ws, message):
         try:
             from rubika.Types import Message
-            bot, update, conditions = Bot("", auth=self.auth, privateKey=self.privateKey), loads(self.enc.decrypt(loads(message)["data_enc"])) if loads(message).get("data_enc") != None else {}, []
+            bot, update, conditions = Bot("", self.auth), loads(
+                self.enc.decrypt(loads(message)["data_enc"])), []
             if self.logging:
                 print(update)
             parsedMessage = Message(
@@ -563,7 +567,8 @@ class Socket:
         except IndexError:
             pass
         except Exception as e:
-            print("\n✘ ERROR at line : ", exc_info()[2].tb_lineno, "\n    ", e)
+            print("\n✘ ERROR at line : ", exc_info()[
+                  2].tb_lineno, "\n    ", e) if self.logging else None
 
     def handler(self, *args, **kwargs):
         def wrapper(func):
@@ -575,9 +580,10 @@ class Socket:
                 Bot.wsURL = _getURL(key='default_sockets')
             except exceptions.ConnectionError:
                 ...
-            ws = websocket.WebSocketApp(Bot.wsURL, on_open=self.on_open, on_message=self.on_message, on_error=self.on_error, on_close=self.on_close, on_ping=self.on_ping, on_pong=self.on_pong)
+            ws = websocket.WebSocketApp(Bot.wsURL, on_open=Socket(self.auth).on_open, on_message=Socket(self.auth).on_message, on_error=Socket(
+                self.auth).on_error, on_close=Socket(self.auth).on_close, on_ping=Socket(self.auth).on_ping, on_pong=Socket(self.auth).on_pong)
             websocket.enableTrace(self.logging)
             Thread(target=ws.run_forever, kwargs=dict(http_proxy_host=self.proxy[0] if self.proxy is not None else None,
-                   http_proxy_port=self.proxy[1] if self.proxy is not None else None, ping_interval=30, ping_timeout=5, host="web.rubika.ir")).start()
+                   http_proxy_port=self.proxy[1] if self.proxy is not None else None, ping_interval=30, ping_timeout=10)).start()
 
         return wrapper

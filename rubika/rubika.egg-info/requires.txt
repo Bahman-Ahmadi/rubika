@@ -5,4 +5,3 @@ tqdm
 aiohttp
 rich
 websocket-client
-schedule

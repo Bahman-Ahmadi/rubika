@@ -8,8 +8,8 @@ from rubika.configs import makeRubinoData, welcome, __version__, __license__, __
 class Rubino:
     def __init__(self, auth: str):
         self.auth = auth
-        #self.profileID = [i['id'] for i in self.getProfileList().get(
-        #    "data").get("profiles") if i['is_default']][0]
+        self.profileID = [i['id'] for i in self.getProfileList().get(
+            "data").get("profiles") if i['is_default']][0]
         welcome(
             f"rubika library version {__version__}\n{__copyright__}\n→ docs : https://rubikalib.github.io\n\nswitching rubino...")
 
