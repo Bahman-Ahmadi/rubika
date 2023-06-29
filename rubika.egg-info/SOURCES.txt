@@ -11,7 +11,7 @@ rubika/exceptions.py
 rubika/fileIO.py
 rubika/filters.py
 rubika/rubino.py
-rubika/sync.py
+rubika/setup.py
 rubika/tools.py
 rubika.egg-info/PKG-INFO
 rubika.egg-info/SOURCES.txt
