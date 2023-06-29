@@ -97,7 +97,6 @@ class Bot:
 
     @staticmethod
     def _create(auth, method, data, client=clients.web):
-        print(auth, Bot.privateKey)
         return makeData(auth, encryption(encryption.changeAuthType(auth), private_key=Bot.privateKey), method, dict(data))
 
     @staticmethod

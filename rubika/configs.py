@@ -96,7 +96,6 @@ def POST(json: dict, method, url: str = None, platform="web.rubika.ir", enc: enc
             }).text
             response = loads(str(enc.decrypt(loads(response).get("data_enc")))) if "data_enc" in loads(response).keys() and isEncrypted else loads(response)
             if "status" in response.keys() and response.get("status") != "OK":
-                print(json, method, url, platform, response)
                 if response.get("status_det") == "NOT_REGISTERED":
                     raise NotRegistered("the auth is incorrect. please sure about your account's health then login again.")
                 elif response.get("status_det") == "INVALID_INPUT":
