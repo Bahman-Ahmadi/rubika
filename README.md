@@ -75,4 +75,7 @@ rubika library is licensed under [GPLv3 license](https://github.com/bahman-ahmad
 
 This is not an official rubika product. It is not affiliated with nor endorsed by rubika Inc.
 
-© 2022 Bahman Ahmadi
+© 2023 Bahman Ahmadi
+
+# End of support
+This project has reached its destination, it's time to say goodbye! 👋 (19 jul 2023)
